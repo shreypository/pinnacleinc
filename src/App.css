@@ -624,3 +624,314 @@ html {
   font-style: normal;
   color: #7c3aed;
 }
+
+/* ================= SAT/AP PAGE ================= */
+
+.satap-page {
+  padding: 80px 0;
+}
+
+/* HERO */
+.satap-hero {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.satap-hero h1 {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.satap-hero p {
+  color: #555;
+}
+
+/* FEATURES */
+.satap-features {
+  margin-bottom: 70px;
+}
+
+.satap-features h2 {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.feature-card {
+  background: #f9f9ff;
+  padding: 25px;
+  border-radius: 14px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+}
+
+.feature-card h3 {
+  color: #7c3aed;
+  margin-bottom: 10px;
+}
+
+/* PROCESS */
+.satap-process {
+  margin-bottom: 70px;
+}
+
+.satap-process h2 {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.process-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.step {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.step h3 {
+  color: #7c3aed;
+  margin-bottom: 10px;
+}
+
+/* CTA */
+.satap-cta {
+  text-align: center;
+}
+
+.satap-cta h2 {
+  margin-bottom: 20px;
+}
+
+/* ================= IELTS PAGE ================= */
+
+.ielts-page {
+  padding: 80px 0;
+}
+
+/* HERO */
+.ielts-hero {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.ielts-hero h1 {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.ielts-hero p {
+  color: #555;
+}
+
+/* FEATURES */
+.ielts-features {
+  margin-bottom: 70px;
+}
+
+.ielts-features h2 {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.ielts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.ielts-card {
+  background: #f9f9ff;
+  padding: 25px;
+  border-radius: 14px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.ielts-card:hover {
+  transform: translateY(-8px);
+}
+
+.ielts-card h3 {
+  color: #7c3aed;
+  margin-bottom: 10px;
+}
+
+/* PROCESS */
+.ielts-process {
+  margin-bottom: 70px;
+}
+
+.ielts-process h2 {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.ielts-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* CTA */
+.ielts-cta {
+  text-align: center;
+}
+
+/* ================= ABOUT PAGE ================= */
+
+.about-page {
+  padding: 80px 0;
+}
+
+/* HERO */
+.about-hero {
+  text-align: center;
+  margin-bottom: 70px;
+}
+
+.about-hero h1 {
+  font-size: 42px;
+  margin-bottom: 15px;
+}
+
+.about-hero p {
+  color: #555;
+  font-size: 16px;
+}
+
+/* STORY SPLIT */
+.about-story {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 40px;
+  align-items: center;
+  margin-bottom: 80px;
+}
+
+.story-text h2 {
+  margin-bottom: 15px;
+}
+
+.story-text p {
+  color: #555;
+  margin-bottom: 10px;
+}
+
+/* HIGHLIGHT BOX */
+.story-box {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white;
+  padding: 30px;
+  border-radius: 16px;
+}
+
+.story-box h3 {
+  margin-bottom: 10px;
+}
+
+/* WHY */
+.about-why {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 80px;
+}
+
+.about-why h2 {
+  margin-bottom: 15px;
+}
+
+.about-why p {
+  color: #555;
+}
+
+/* FOUNDERS */
+.founders {
+  text-align: center;
+}
+
+.founders h2 {
+  margin-bottom: 40px;
+}
+
+.founders-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+/* CARD */
+.founder-card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+  transition: 0.3s;
+}
+
+/* IMAGE */
+.founder-image {
+  width: 130px;
+  height: 130px;
+  background: linear-gradient(135deg, #ddd, #bbb);
+  border-radius: 50%;
+  margin: 0 auto 20px;
+}
+
+/* TEXT */
+.founder-card h3 {
+  color: #7c3aed;
+  margin-bottom: 10px;
+}
+
+.founder-card p {
+  font-size: 14px;
+  color: #555;
+}
+
+/* ================= CONTACT ================= */
+
+.contact-page {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.contact-form {
+  max-width: 500px;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* WHATSAPP */
+.whatsapp-btn {
+  display: inline-block;
+  margin-top: 20px;
+  background: #25D366;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+}
