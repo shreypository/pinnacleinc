@@ -158,3 +158,321 @@
   background-color: #7c3aed;
   color: white;
 }
+
+/* HERO SECTION */
+.hero {
+  padding: 60px 0 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* LAYOUT */
+.hero-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+/* TEXT */
+.hero-text {
+  max-width: 550px;
+}
+
+/* HEADLINE */
+.hero-text h1 {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+/* HIGHLIGHT */
+.hero-text span {
+  color: #7c3aed;
+}
+
+/* PARAGRAPH */
+.hero-text p {
+  font-size: 18px;
+  color: #444;
+  margin-bottom: 30px;
+}
+
+/* BUTTONS */
+.hero-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+/* PRIMARY BUTTON */
+.primary-btn {
+  background-color: #7c3aed;
+  color: white;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.primary-btn:hover {
+  background-color: #6d28d9;
+}
+
+/* SECONDARY BUTTON */
+.secondary-btn {
+  background-color: transparent;
+  border: 2px solid #7c3aed;
+  color: #7c3aed;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.secondary-btn:hover {
+  background-color: #7c3aed;
+  color: white;
+}
+
+/* RIGHT VISUAL */
+.hero-visual {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* GLOW EFFECT */
+.glow-circle {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, #7c3aed 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.7;
+}
+
+.results h2 {
+  font-size: 32px;
+  margin-bottom: 40px;
+}
+
+/* FIXED GRID */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* CARD */
+.result-card {
+  background: white;
+  padding: 30px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  transition: 0.3s;
+}
+
+.result-card:hover {
+  transform: translateY(-8px);
+}
+
+.result-card h3 {
+  font-size: 36px;
+  color: #7c3aed;
+  margin-bottom: 10px;
+}
+
+.result-card p {
+  font-size: 16px;
+  color: #555;
+}
+
+/* ================= PROGRAMS ================= */
+.programs {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.programs h2 {
+  font-size: 32px;
+  margin-bottom: 40px;
+}
+
+/* FIXED GRID */
+.programs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.program-card {
+  background: white;
+  padding: 30px 25px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: 0.3s;
+  text-align: left;
+}
+
+.program-card:hover {
+  transform: translateY(-10px);
+}
+
+.program-card h3 {
+  font-size: 22px;
+  margin-bottom: 15px;
+  color: #7c3aed;
+}
+
+.program-card p {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.program-card a {
+  font-weight: 600;
+  color: #7c3aed;
+}
+
+/* FOOTER */
+.footer {
+  background-color: #111;
+  color: white;
+  padding: 60px 0 20px;
+  margin-top: 80px;
+}
+
+/* LAYOUT */
+.footer-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px;
+}
+
+/* LEFT */
+.footer-left h3 {
+  margin-bottom: 15px;
+}
+
+.footer-left p {
+  color: #ccc;
+  font-size: 14px;
+}
+
+/* LINKS */
+.footer-links h4,
+.footer-contact h4 {
+  margin-bottom: 15px;
+}
+
+.footer-links a {
+  display: block;
+  margin-bottom: 8px;
+  color: #ccc;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.footer-links a:hover {
+  color: white;
+}
+
+/* CONTACT */
+.footer-contact p {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 8px;
+}
+
+/* BOTTOM */
+.footer-bottom {
+  text-align: center;
+  margin-top: 40px;
+  border-top: 1px solid #333;
+  padding-top: 15px;
+  font-size: 13px;
+  color: #aaa;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ================= MOBILE RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+
+  /* NAVBAR */
+  .nav-links {
+    gap: 16px;
+    font-size: 14px;
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    width: 70px;
+    height: 70px;
+  }
+
+  .logo-section h1 {
+    font-size: 22px;
+  }
+
+  /* HERO */
+  .hero-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-text {
+    max-width: 100%;
+  }
+
+  .hero-text h1 {
+    font-size: 34px;
+  }
+
+  .hero-text p {
+    font-size: 16px;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .hero-visual {
+    margin-top: 20px;
+  }
+
+  .glow-circle {
+    width: 180px;
+    height: 180px;
+  }
+
+  /* RESULTS */
+  .results-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* PROGRAMS */
+  .programs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .program-card {
+    text-align: center;
+  }
+
+  /* FOOTER */
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+}
