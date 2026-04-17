@@ -9,6 +9,8 @@ export default function Contact() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -16,7 +18,10 @@ export default function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setLoading(true);
+    setSuccess(false);
+    setError(false);
 
     try {
       await fetch("https://pinnacle-backend-13xo.onrender.com/api/contact", {
@@ -27,7 +32,7 @@ export default function Contact() {
         body: JSON.stringify(form)
       });
 
-      alert("✅ Message sent successfully!");
+      setSuccess(true);
 
       setForm({
         name: "",
@@ -37,7 +42,7 @@ export default function Contact() {
       });
 
     } catch (err) {
-      alert("❌ Error sending message");
+      setError(true);
     }
 
     setLoading(false);
@@ -55,14 +60,26 @@ export default function Contact() {
             We’ll get back to you as soon as possible.
           </p>
 
-          {/* WHATSAPP BUTTON (NO NUMBER FOR NOW) */}
+          {/* WHATSAPP BUTTON */}
           <a
             className="whatsapp-btn"
-            href={`https://wa.me/?text=Hi, I am ${form.name || "a student"}. I am interested in Pinnacle services.`}
+            href={`https://wa.me/?text=${encodeURIComponent(
+              `Hi, I am ${form.name || "a student"}. I am interested in Pinnacle services.`
+            )}`}
             target="_blank"
           >
             Chat on WhatsApp
           </a>
+
+          {/* SUCCESS MESSAGE */}
+          {success && (
+            <p className="success-msg">✅ Message sent successfully!</p>
+          )}
+
+          {/* ERROR MESSAGE */}
+          {error && (
+            <p className="error-msg">❌ Something went wrong. Try again.</p>
+          )}
         </div>
 
         {/* RIGHT SIDE FORM */}

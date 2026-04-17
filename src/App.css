@@ -1012,3 +1012,23 @@ html {
     flex-direction: column;
   }
 }
+
+/* SUCCESS MESSAGE */
+.success-msg {
+  margin-top: 15px;
+  color: green;
+  font-weight: 600;
+}
+
+/* ERROR MESSAGE */
+.error-msg {
+  margin-top: 15px;
+  color: red;
+  font-weight: 600;
+}
+
+/* DISABLED BUTTON */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
