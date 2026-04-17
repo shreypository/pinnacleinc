@@ -8,12 +8,15 @@ export default function Contact() {
     message: ""
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       await fetch("http://localhost:5000/api/contact", {
@@ -24,24 +27,52 @@ export default function Contact() {
         body: JSON.stringify(form)
       });
 
-      alert("Message sent successfully!");
+      alert("✅ Message sent successfully!");
+
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        message: ""
+      });
+
     } catch (err) {
-      alert("Error sending message");
+      alert("❌ Error sending message");
     }
+
+    setLoading(false);
   };
 
   return (
     <section className="contact-page">
-      <div className="container">
+      <div className="container contact-wrapper">
 
-        <h1>Contact Us</h1>
+        {/* LEFT SIDE */}
+        <div className="contact-info">
+          <h1>Contact Us</h1>
+          <p>
+            Reach out for guidance, enrollment, or any queries.
+            We’ll get back to you as soon as possible.
+          </p>
 
+          {/* WHATSAPP BUTTON (NO NUMBER FOR NOW) */}
+          <a
+            className="whatsapp-btn"
+            href={`https://wa.me/?text=Hi, I am ${form.name || "a student"}. I am interested in Pinnacle services.`}
+            target="_blank"
+          >
+            Chat on WhatsApp
+          </a>
+        </div>
+
+        {/* RIGHT SIDE FORM */}
         <form className="contact-form" onSubmit={handleSubmit}>
 
           <input
             type="text"
             name="name"
             placeholder="Your Name"
+            value={form.name}
             onChange={handleChange}
             required
           />
@@ -50,6 +81,7 @@ export default function Contact() {
             type="email"
             name="email"
             placeholder="Your Email"
+            value={form.email}
             onChange={handleChange}
             required
           />
@@ -58,27 +90,22 @@ export default function Contact() {
             type="text"
             name="phone"
             placeholder="Phone Number"
+            value={form.phone}
             onChange={handleChange}
           />
 
           <textarea
             name="message"
             placeholder="Your Message"
+            value={form.message}
             onChange={handleChange}
           />
 
-          <button className="primary-btn">Send Message</button>
+          <button className="primary-btn" disabled={loading}>
+            {loading ? "Sending..." : "Send Message"}
+          </button>
 
         </form>
-
-        {/* WHATSAPP BUTTON */}
-        <a
-          className="whatsapp-btn"
-          href="https://wa.me/91XXXXXXXXXX?text=Hi%20I%20am%20interested%20in%20your%20services"
-          target="_blank"
-        >
-          Chat on WhatsApp
-        </a>
 
       </div>
     </section>

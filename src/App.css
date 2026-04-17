@@ -903,35 +903,112 @@ html {
   color: #555;
 }
 
-/* ================= CONTACT ================= */
-
+/* CONTACT PAGE */
 .contact-page {
   padding: 80px 0;
-  text-align: center;
 }
 
+/* WRAPPER */
+.contact-wrapper {
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+/* LEFT SIDE */
+.contact-info {
+  flex: 1;
+  min-width: 300px;
+}
+
+.contact-info h1 {
+  font-size: 40px;
+  margin-bottom: 16px;
+}
+
+.contact-info p {
+  color: #555;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+/* FORM */
 .contact-form {
-  max-width: 500px;
-  margin: 40px auto;
+  flex: 1;
+  min-width: 320px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
 }
 
 .contact-form input,
 .contact-form textarea {
-  padding: 12px;
-  border-radius: 8px;
+  padding: 14px 16px;
+  border-radius: 10px;
   border: 1px solid #ddd;
+  font-size: 15px;
+  transition: all 0.2s ease;
 }
 
-/* WHATSAPP */
+/* INPUT FOCUS EFFECT */
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+/* TEXTAREA */
+.contact-form textarea {
+  min-height: 120px;
+  resize: none;
+}
+
+/* BUTTON */
+.primary-btn {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+}
+
+/* DISABLED BUTTON */
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* WHATSAPP BUTTON */
 .whatsapp-btn {
   display: inline-block;
-  margin-top: 20px;
+  margin-top: 10px;
+  padding: 12px 20px;
+  border-radius: 10px;
   background: #25D366;
   color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
   font-weight: 600;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.whatsapp-btn:hover {
+  background: #1ebe5d;
+  transform: translateY(-2px);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .contact-wrapper {
+    flex-direction: column;
+  }
 }
