@@ -4,11 +4,12 @@ const cors = require("cors");
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// ✅ MongoDB Connection (FINAL FIX)
-mongoose.connect("mongodb://pinnacleincwork_db_user:PinnacleInc%402026%21@ac-1pff4ap-shard-00-00.lwf0oxj.mongodb.net:27017,ac-1pff4ap-shard-00-01.lwf0oxj.mongodb.net:27017,ac-1pff4ap-shard-00-02.lwf0oxj.mongodb.net:27017/pinnacleDB?ssl=true&replicaSet=atlas-jk2zsk-shard-0&authSource=admin&retryWrites=true&w=majority")
+// ✅ MongoDB Connection (uses ENV variable)
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log("MongoDB Error:", err));
 
@@ -18,8 +19,9 @@ const ContactSchema = new mongoose.Schema({
   email: String,
   phone: String,
   message: String
-});
+}, { timestamps: true });
 
+// Model
 const Contact = mongoose.model("Contact", ContactSchema);
 
 // Route
@@ -32,11 +34,19 @@ app.post("/api/contact", async (req, res) => {
 
     res.status(200).json({ message: "Saved successfully" });
   } catch (err) {
-    console.error(err);
+    console.error("Error saving contact:", err);
     res.status(500).json({ message: "Error saving data" });
   }
 });
 
-app.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
+// ✅ Test route (important for checking deployment)
+app.get("/", (req, res) => {
+  res.send("Backend is running 🚀");
+});
+
+// ✅ Port setup (Render requirement)
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
