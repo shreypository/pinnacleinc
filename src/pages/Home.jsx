@@ -123,7 +123,7 @@ export default function Home() {
   <div className="container footer-content">
 
     <div className="footer-left">
-      <h3>Pinnacle Incorporation</h3>
+      <h3>Pinnacle Incorporated</h3>
       <p>
         Helping students achieve global academic success through expert guidance and proven strategies.
       </p>
@@ -147,7 +147,7 @@ export default function Home() {
   </div>
 
   <div className="footer-bottom">
-    <p>© 2026 Pinnacle Incorporation. All rights reserved.</p>
+    <p>© 2026 Pinnacle Incorporated. All rights reserved.</p>
   </div>
 
 </footer>

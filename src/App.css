@@ -76,14 +76,14 @@
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 13px;
 }
 
 /* NAV LINK */
 .nav-link {
   position: relative;
   color: white !important;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   text-decoration: none;
   padding-bottom: 4px;

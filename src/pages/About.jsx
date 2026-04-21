@@ -12,7 +12,7 @@ export default function About() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1>About Pinnacle Incorporation</h1>
+          <h1>About Pinnacle Incorporated</h1>
           <p>
             Empowering students to reach their global peak through strategy,
             mentorship, and results-driven preparation.
@@ -31,7 +31,7 @@ export default function About() {
           >
             <h2>Our Story</h2>
             <p>
-              Pinnacle Incorporation was founded with a simple vision — to help
+              Pinnacle Incorporated was founded with a simple vision — to help
               students unlock their true potential and achieve global academic success.
             </p>
             <p>
