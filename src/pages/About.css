@@ -1,0 +1,147 @@
+/* Base */
+.about-page {
+  position: relative;
+  min-height: 100vh;
+  padding: 80px 40px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+/* Background Glow */
+.about-bg {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(106,13,173,0.2), transparent);
+  top: -150px;
+  left: -150px;
+  filter: blur(120px);
+}
+
+/* Container */
+.container {
+  max-width: 1100px;
+  margin: auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* Hero */
+.about-hero {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.about-hero h1 {
+  font-size: 3rem;
+  color: #6a0dad;
+}
+
+.about-hero p {
+  color: #555;
+}
+
+/* Glass Cards */
+.glass {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 30px;
+  border: 1px solid rgba(106,13,173,0.1);
+  transition: all 0.3s ease;
+}
+
+/* 🔥 Hover Effect */
+.glass:hover {
+  background: #6a0dad;
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(106,13,173,0.3);
+}
+
+.glass:hover h2,
+.glass:hover h3,
+.glass:hover p {
+  color: white;
+}
+
+/* Story */
+.about-story {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 80px;
+}
+
+/* Why */
+.about-why {
+  margin-bottom: 80px;
+  text-align: center;
+}
+
+/* Timeline */
+.timeline-section {
+  margin: 80px 0;
+  text-align: center;
+}
+
+.timeline {
+  position: relative;
+  margin-top: 40px;
+  padding-left: 20px;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 20px;
+  width: 3px;
+  height: 100%;
+  background: #6a0dad;
+}
+
+.timeline-item {
+  display: flex;
+  margin-bottom: 40px;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  background: #6a0dad;
+  border-radius: 50%;
+  margin-right: 20px;
+}
+
+.timeline-item:hover .dot {
+  transform: scale(1.5);
+  background: #c77dff;
+}
+
+/* Founders */
+.founders {
+  text-align: center;
+}
+
+.founders-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+.founder-image {
+  height: 120px;
+  background: linear-gradient(135deg, #6a0dad, #c77dff);
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .about-story {
+    grid-template-columns: 1fr;
+  }
+
+  .founders-grid {
+    grid-template-columns: 1fr;
+  }
+}

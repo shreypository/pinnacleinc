@@ -1,3 +1,8 @@
 export default function Gre() {
-  return <h1>GRE Page</h1>;
+  return (
+    <div style={{ padding: "40px" }}>
+      <h1>GRE</h1>
+      <p>Welcome to the GRE preparation page.</p>
+    </div>
+  );
 }

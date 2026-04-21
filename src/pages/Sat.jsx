@@ -1,3 +1,8 @@
 export default function Sat() {
-  return <h1>SAT / AP Page</h1>;
+  return (
+    <div style={{ padding: "40px" }}>
+      <h1>SAT</h1>
+      <p>Welcome to the SAT preparation page.</p>
+    </div>
+  );
 }
