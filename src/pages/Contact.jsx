@@ -52,7 +52,7 @@ export default function Contact() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/schedule-meeting", {
+      const res = await fetch("https://pinnacle-backend-pq2c.onrender.com/api/schedule-meeting", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -90,7 +90,7 @@ export default function Contact() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/parent-enquiry", {
+      const res = await fetch("https://pinnacle-backend-pq2c.onrender.com/api/parent-enquiry", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
