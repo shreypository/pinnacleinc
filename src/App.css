@@ -8,79 +8,129 @@
   padding-top: 20px;
 }
 
-/* NAVBAR WRAPPER */
+
+/* NAVBAR BASE */
 .navbar {
+  position: fixed;              /* 🔥 required for hide/show */
+  top: 0;
   width: 100%;
-  border-bottom: 1px solid #eee;
+  z-index: 1000;
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* TOP SECTION */
-.nav-top {
+/* SHOW / HIDE ANIMATION */
+.navbar.show {
+  transform: translateY(0);
+}
+
+.navbar.hide {
+  transform: translateY(-100%);
+}
+
+/* CONTAINER */
+.nav-container {
+  display: flex;
+  width: 100%;
+}
+
+/* LEFT SIDE (WHITE BLOCK) */
+.nav-left {
+  background: white;
+  padding: 10px 25px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 10px 0; /* reduced from 20px */
+  flex-shrink: 0;
 }
 
+/* LOGO */
 .logo-section {
   display: flex;
   align-items: center;
-  gap: 14px; /* slightly tighter */
+  gap: 10px;
 }
 
 .logo {
-  width: 95px;
-  height: 95px;
-  object-fit: contain;
-  display: block; /* removes extra inline spacing */
+  width: 45px;
+  height: 45px;
 }
 
+/* TITLE */
 .logo-section h1 {
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 700;
-  color: #6d28d9;
+  color: #6a11cb;
+  letter-spacing: 0.5px;
 }
 
-/* BOTTOM NAV */
-.nav-bottom {
-  background-color: #7c3aed;
-  padding: 12px 0;
+/* RIGHT SIDE (PURPLE) */
+.nav-right {
+  flex: 1;
+  background: linear-gradient(to right, #6a11cb, #8e44ad);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 20px;
 }
 
-/* NAV LINKS CONTAINER */
+/* LINKS */
 .nav-links {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 28px;
-  flex-wrap: wrap;
+  gap: 22px;
 }
 
-/* FIX FOR MOTION DIV WRAPPER */
-.nav-links div {
-  display: inline-block;
-}
-
-/* LINK STYLE */
-.nav-links a {
-  color: white;
-  font-weight: 500;
+/* NAV LINK */
+.nav-link {
+  position: relative;
+  color: white !important;
   font-size: 15px;
-  transition: 0.3s ease;
+  font-weight: 500;
+  text-decoration: none;
+  padding-bottom: 4px;
 }
 
-/* HOVER EFFECT */
-.nav-links a:hover {
-  opacity: 0.8;
+/* UNDERLINE ANIMATION */
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  height: 2px;
+  background-color: white;
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.nav-link.active::after {
+  width: 100%;
 }
 
 /* LOGIN BUTTON */
 .login-btn {
   background: white;
-  color: #7c3aed !important;
-  padding: 6px 14px;
+  color: #6a11cb !important;
+  padding: 8px 16px;
   border-radius: 20px;
   font-weight: 600;
+}
+
+/* GLOBAL FONT */
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* OPTIONAL: ADD SHADOW WHEN VISIBLE */
+.navbar.show {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* HERO SECTION (unchanged) */
+.hero {
+  padding: 80px 0;
 }
 
 /* HERO SECTION */
