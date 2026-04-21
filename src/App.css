@@ -675,172 +675,7 @@ html {
   color: #7c3aed;
 }
 
-/* ================= SAT/AP PAGE ================= */
 
-.satap-page {
-  padding: 80px 0;
-}
-
-/* HERO */
-.satap-hero {
-  text-align: center;
-  margin-bottom: 60px;
-}
-
-.satap-hero h1 {
-  font-size: 40px;
-  margin-bottom: 10px;
-}
-
-.satap-hero p {
-  color: #555;
-}
-
-/* FEATURES */
-.satap-features {
-  margin-bottom: 70px;
-}
-
-.satap-features h2 {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-}
-
-.feature-card {
-  background: #f9f9ff;
-  padding: 25px;
-  border-radius: 14px;
-  text-align: center;
-  transition: 0.3s;
-}
-
-.feature-card:hover {
-  transform: translateY(-8px);
-}
-
-.feature-card h3 {
-  color: #7c3aed;
-  margin-bottom: 10px;
-}
-
-/* PROCESS */
-.satap-process {
-  margin-bottom: 70px;
-}
-
-.satap-process h2 {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.process-steps {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-
-.step {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-}
-
-.step h3 {
-  color: #7c3aed;
-  margin-bottom: 10px;
-}
-
-/* CTA */
-.satap-cta {
-  text-align: center;
-}
-
-.satap-cta h2 {
-  margin-bottom: 20px;
-}
-
-/* ================= IELTS PAGE ================= */
-
-.ielts-page {
-  padding: 80px 0;
-}
-
-/* HERO */
-.ielts-hero {
-  text-align: center;
-  margin-bottom: 60px;
-}
-
-.ielts-hero h1 {
-  font-size: 40px;
-  margin-bottom: 10px;
-}
-
-.ielts-hero p {
-  color: #555;
-}
-
-/* FEATURES */
-.ielts-features {
-  margin-bottom: 70px;
-}
-
-.ielts-features h2 {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.ielts-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-}
-
-.ielts-card {
-  background: #f9f9ff;
-  padding: 25px;
-  border-radius: 14px;
-  text-align: center;
-  transition: 0.3s;
-}
-
-.ielts-card:hover {
-  transform: translateY(-8px);
-}
-
-.ielts-card h3 {
-  color: #7c3aed;
-  margin-bottom: 10px;
-}
-
-/* PROCESS */
-.ielts-process {
-  margin-bottom: 70px;
-}
-
-.ielts-process h2 {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.ielts-steps {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-
-/* CTA */
-.ielts-cta {
-  text-align: center;
-}
 
 
 /* CONTACT PAGE */
@@ -848,41 +683,56 @@ html {
   padding: 80px 0;
 }
 
-/* WRAPPER */
+/* WRAPPER (2 COLUMN LAYOUT) */
 .contact-wrapper {
   display: flex;
-  gap: 60px;
+  gap: 50px;
   align-items: flex-start;
+  justify-content: space-between;
   flex-wrap: wrap;
 }
 
 /* LEFT SIDE */
 .contact-info {
   flex: 1;
-  min-width: 300px;
+  min-width: 320px;
+  background: #fafafa;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-.contact-info h1 {
-  font-size: 40px;
-  margin-bottom: 16px;
-}
-
-.contact-info p {
-  color: #555;
-  margin-bottom: 30px;
-  line-height: 1.6;
-}
-
-/* FORM */
+/* RIGHT SIDE FORM */
 .contact-form {
   flex: 1;
   min-width: 320px;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
+.contact-info h1 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.contact-info p {
+  color: #555;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.contact-form h2 {
+  margin-bottom: 10px;
+}
+
 .contact-form input,
+.contact-form select,
 .contact-form textarea {
   padding: 14px 16px;
   border-radius: 10px;
@@ -891,21 +741,21 @@ html {
   transition: all 0.2s ease;
 }
 
-/* INPUT FOCUS EFFECT */
+/* FOCUS EFFECT */
 .contact-form input:focus,
+.contact-form select:focus,
 .contact-form textarea:focus {
   outline: none;
   border-color: #7c3aed;
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
-/* TEXTAREA */
-.contact-form textarea {
+/* MULTI SELECT BOX */
+.contact-form select[multiple] {
   min-height: 120px;
-  resize: none;
+  cursor: pointer;
 }
 
-/* BUTTON */
 .primary-btn {
   background: linear-gradient(135deg, #7c3aed, #6d28d9);
   color: white;
@@ -922,53 +772,29 @@ html {
   box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
 }
 
-/* DISABLED BUTTON */
+/* DISABLED */
 .primary-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* WHATSAPP BUTTON */
-.whatsapp-btn {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 12px 20px;
-  border-radius: 10px;
-  background: #25D366;
-  color: white;
+.success-msg {
+  margin-top: 20px;
+  text-align: center;
+  color: green;
   font-weight: 600;
-  text-decoration: none;
-  transition: 0.3s;
 }
 
-.whatsapp-btn:hover {
-  background: #1ebe5d;
-  transform: translateY(-2px);
+.error-msg {
+  margin-top: 20px;
+  text-align: center;
+  color: red;
+  font-weight: 600;
 }
 
-/* RESPONSIVE */
 @media (max-width: 768px) {
   .contact-wrapper {
     flex-direction: column;
   }
 }
 
-/* SUCCESS MESSAGE */
-.success-msg {
-  margin-top: 15px;
-  color: green;
-  font-weight: 600;
-}
-
-/* ERROR MESSAGE */
-.error-msg {
-  margin-top: 15px;
-  color: red;
-  font-weight: 600;
-}
-
-/* DISABLED BUTTON */
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}

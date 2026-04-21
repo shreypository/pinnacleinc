@@ -1,48 +1,118 @@
 import { useState } from "react";
+import "./Contact.css";
 
 export default function Contact() {
-  const [form, setForm] = useState({
+
+  /* ================================
+     LEFT FORM → MEETING
+  ================================= */
+  const [meetingForm, setMeetingForm] = useState({
     name: "",
-    email: "",
     phone: "",
-    message: ""
+    service: [],
+    date: "",
+    time: ""
+  });
+
+  /* ================================
+     RIGHT FORM → PARENT/STUDENT
+  ================================= */
+  const [parentForm, setParentForm] = useState({
+    studentName: "",
+    studentPhone: "",
+    parentName: "",
+    parentPhone: "",
+    services: []
   });
 
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const servicesList = [
+  "SAT/AP",
+  "GRE",
+  "GMAT",
+  "IELTS",
+  "TOEFL",
+  "PTE",
+  "ACT",
+  "VISA",
+  "COUNSELLING",
+  "ADDITIONAL SERVICES"
+];
 
-  const handleSubmit = async (e) => {
+  /* ================================
+     HANDLE MEETING SUBMIT
+  ================================= */
+  const handleMeetingSubmit = async (e) => {
     e.preventDefault();
-
     setLoading(true);
-    setSuccess(false);
-    setError(false);
+    setSuccess("");
+    setError("");
 
     try {
-      await fetch("https://pinnacle-backend-13xo.onrender.com/api/contact", {
+      const res = await fetch("http://localhost:5000/api/schedule-meeting", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify(meetingForm)
       });
 
-      setSuccess(true);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
 
-      setForm({
+      setSuccess("Meeting scheduled successfully!");
+
+      setMeetingForm({
         name: "",
-        email: "",
         phone: "",
-        message: ""
+        service: [],
+        date: "",
+        time: ""
       });
 
     } catch (err) {
-      setError(true);
+      setError(err.message || "Failed to schedule meeting");
+    }
+
+    setLoading(false);
+  };
+
+  /* ================================
+     HANDLE PARENT SUBMIT
+  ================================= */
+  const handleParentSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setSuccess("");
+    setError("");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/parent-enquiry", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(parentForm)
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      setSuccess("Details submitted successfully!");
+
+      setParentForm({
+        studentName: "",
+        studentPhone: "",
+        parentName: "",
+        parentPhone: "",
+        services: []
+      });
+
+    } catch (err) {
+      setError(err.message || "Submission failed");
     }
 
     setLoading(false);
@@ -52,79 +122,157 @@ export default function Contact() {
     <section className="contact-page">
       <div className="container contact-wrapper">
 
-        {/* LEFT SIDE */}
+        {/* LEFT SIDE — MEETING */}
         <div className="contact-info">
-          <h1>Contact Us</h1>
-          <p>
-            Reach out for guidance, enrollment, or any queries.
-            We’ll get back to you as soon as possible.
-          </p>
+          <h1>Schedule a Meeting</h1>
+          <p>Select services, date and time. We’ll connect with you.</p>
 
-          {/* WHATSAPP BUTTON */}
-          <a
-            className="whatsapp-btn"
-            href={`https://wa.me/?text=${encodeURIComponent(
-              `Hi, I am ${form.name || "a student"}. I am interested in Pinnacle services.`
-            )}`}
-            target="_blank"
-          >
-            Chat on WhatsApp
-          </a>
+          <form className="contact-form" onSubmit={handleMeetingSubmit}>
 
-          {/* SUCCESS MESSAGE */}
-          {success && (
-            <p className="success-msg">✅ Message sent successfully!</p>
-          )}
+            <input
+              type="text"
+              placeholder="Your Name"
+              value={meetingForm.name}
+              onChange={(e) =>
+                setMeetingForm({ ...meetingForm, name: e.target.value })
+              }
+              required
+            />
 
-          {/* ERROR MESSAGE */}
-          {error && (
-            <p className="error-msg">❌ Something went wrong. Try again.</p>
-          )}
+            <input
+              type="text"
+              placeholder="Phone Number"
+              value={meetingForm.phone}
+              onChange={(e) =>
+                setMeetingForm({ ...meetingForm, phone: e.target.value })
+              }
+              required
+            />
+
+            {/* CHECKBOX SERVICES */}
+            <div className="checkbox-group">
+              {servicesList.map((service) => (
+                <label key={service} className="checkbox-item">
+                  <input
+                    type="checkbox"
+                    value={service}
+                    checked={meetingForm.service.includes(service)}
+                    onChange={(e) => {
+                      const updated = e.target.checked
+                        ? [...meetingForm.service, service]
+                        : meetingForm.service.filter((s) => s !== service);
+
+                      setMeetingForm({ ...meetingForm, service: updated });
+                    }}
+                  />
+                  {service}
+                </label>
+              ))}
+            </div>
+
+            <input
+              type="date"
+              value={meetingForm.date}
+              onChange={(e) =>
+                setMeetingForm({ ...meetingForm, date: e.target.value })
+              }
+              required
+            />
+
+            <input
+              type="time"
+              value={meetingForm.time}
+              onChange={(e) =>
+                setMeetingForm({ ...meetingForm, time: e.target.value })
+              }
+              required
+            />
+
+            <button className="primary-btn" disabled={loading}>
+              {loading ? "Scheduling..." : "Schedule Meeting"}
+            </button>
+
+          </form>
         </div>
 
-        {/* RIGHT SIDE FORM */}
-        <form className="contact-form" onSubmit={handleSubmit}>
+        {/* RIGHT SIDE — PARENT/STUDENT */}
+        <form className="contact-form" onSubmit={handleParentSubmit}>
+
+          <h2>Student & Parent Details</h2>
 
           <input
             type="text"
-            name="name"
-            placeholder="Your Name"
-            value={form.name}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Your Email"
-            value={form.email}
-            onChange={handleChange}
+            placeholder="Student Name"
+            value={parentForm.studentName}
+            onChange={(e) =>
+              setParentForm({ ...parentForm, studentName: e.target.value })
+            }
             required
           />
 
           <input
             type="text"
-            name="phone"
-            placeholder="Phone Number"
-            value={form.phone}
-            onChange={handleChange}
+            placeholder="Student Contact"
+            value={parentForm.studentPhone}
+            onChange={(e) =>
+              setParentForm({ ...parentForm, studentPhone: e.target.value })
+            }
+            required
           />
 
-          <textarea
-            name="message"
-            placeholder="Your Message"
-            value={form.message}
-            onChange={handleChange}
+          <input
+            type="text"
+            placeholder="Parent Name"
+            value={parentForm.parentName}
+            onChange={(e) =>
+              setParentForm({ ...parentForm, parentName: e.target.value })
+            }
+            required
           />
+
+          <input
+            type="text"
+            placeholder="Parent Contact"
+            value={parentForm.parentPhone}
+            onChange={(e) =>
+              setParentForm({ ...parentForm, parentPhone: e.target.value })
+            }
+            required
+          />
+
+          {/* CHECKBOX SERVICES */}
+          <div className="checkbox-group">
+            {servicesList.map((service) => (
+              <label key={service} className="checkbox-item">
+                <input
+                  type="checkbox"
+                  value={service}
+                  checked={parentForm.services.includes(service)}
+                  onChange={(e) => {
+                    const updated = e.target.checked
+                      ? [...parentForm.services, service]
+                      : parentForm.services.filter((s) => s !== service);
+
+                    setParentForm({ ...parentForm, services: updated });
+                  }}
+                />
+                {service}
+              </label>
+            ))}
+          </div>
 
           <button className="primary-btn" disabled={loading}>
-            {loading ? "Sending..." : "Send Message"}
+            {loading ? "Submitting..." : "Submit Details"}
           </button>
 
         </form>
 
       </div>
+
+      {/* STATUS MESSAGES */}
+      {success && <p className="success-msg">✅ {success}</p>}
+      {error && <p className="error-msg">❌ {error}</p>}
+
     </section>
   );
 }
