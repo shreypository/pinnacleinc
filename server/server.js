@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const adminAuthRoutes = require("./routes/adminAuth");
 require("dotenv").config();
 
 const app = express();
@@ -123,6 +124,24 @@ app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
+
+/* ================================
+   ADMIN AUTH ROUTES
+================================ */
+app.use("/api/admin", adminAuthRoutes);
+
+/* ================================
+   GET ALL CONTACT DATA
+================================ */
+app.get("/api/contact-data", async (req, res) => {
+  try {
+    const data = await Contact.find().sort({ createdAt: -1 });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching data" });
+  }
+});
+
 /* ================================
    SERVER START
 ================================ */
@@ -131,3 +150,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
