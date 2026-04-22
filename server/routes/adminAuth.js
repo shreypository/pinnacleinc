@@ -4,26 +4,38 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 
 /* ================================
-   SIMPLE ADMIN
+   MULTIPLE ADMINS
 ================================ */
-router.post("/login", async (req, res) => {
+const ADMINS = [
+  { username: "pinnaclepurusharth", password: "P!nn@cLe#2026$X9qL" },
+  { username: "pinnaclechethan", password: "S3cur3@Access!789" }
+];
+
+/* ================================
+   LOGIN
+================================ */
+router.post("/login", (req, res) => {
   try {
     const { username, password } = req.body;
 
-    if (username === "admin" && password === "1234") {
-      const token = jwt.sign(
-        { user: username },
-        process.env.JWT_SECRET,
-        { expiresIn: "1d" }
-      );
+    const user = ADMINS.find(
+      (u) => u.username === username && u.password === password
+    );
 
-      return res.json({ token });
-    } else {
+    if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    const token = jwt.sign(
+      { user: username },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.json({ token });
+
   } catch (err) {
-    console.error("LOGIN ERROR:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });

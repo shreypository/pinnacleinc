@@ -143,6 +143,18 @@ app.get("/api/contact-data", async (req, res) => {
 });
 
 /* ================================
+   DELETE CONTACT
+================================ */
+app.delete("/api/contact/:id", async (req, res) => {
+  try {
+    await Contact.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting" });
+  }
+});
+
+/* ================================
    SERVER START
 ================================ */
 const PORT = process.env.PORT || 5000;
