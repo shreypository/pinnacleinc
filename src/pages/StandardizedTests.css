@@ -1,161 +1,168 @@
+/* ================= CONTAINER ================= */
+
 .tests-container {
-  height: 100vh;
+  position: fixed;   /* 🔥 KEY CHANGE */
+  top: 40px;         /* navbar height */
+  left: 0;
+  width: 100vw;      /* 🔥 full viewport */
+  height: calc(100vh - 80px);
+
   background: radial-gradient(circle at top, #ffffff, #f3ecff);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
+
+  overflow: hidden;
 }
 
-/* TITLE */
+/* ================= TITLE ================= */
+
 .title {
-  font-size: 44px;
+  position: absolute;
+  top: 60px;
+  left: 400px;
+  transform: translateX(-50%);
+
+  font-size: 48px;
   font-weight: 700;
   color: #6a0dad;
-  margin-bottom: 80px;
+  letter-spacing: 0.5px;
 }
 
-/* ROOT VIEW */
+/* ================= ROOT VIEW ================= */
+
 .cards-root {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
   display: flex;
   gap: 120px;
+  justify-content: center;
+  align-items: center;
 }
+/* ================= TREE LAYOUT ================= */
 
-/* TREE LAYOUT */
 .tree-layout {
-  position: relative;
-  width: 900px;
-  height: 400px;
-  margin-top: -60px;
+  position: absolute;
+
+  top: 45%; /* 🔥 slightly above center */
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 1200px;
+  height: 500px;
 }
 
-/* BASE CARD */
+/* ================= CARD BASE ================= */
+
 .card {
-  width: 260px;
-  height: 160px;
+  width: 340px;   /* 🔥 bigger cards */
+  height: 200px;
 
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 
-  color: #6a0dad;
   border-radius: 20px;
-
   border: 1px solid rgba(255, 255, 255, 0.3);
+
+  color: #6a0dad;
 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
+
   cursor: pointer;
+
+  box-shadow: 0 10px 30px rgba(106, 13, 173, 0.15);
 
   position: relative;
   overflow: hidden;
 
-  box-shadow: 0 10px 30px rgba(106, 13, 173, 0.15);
-
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* ROOT cards */
+/* ROOT CARDS NORMAL FLOW */
 .root-card {
   position: relative;
 }
 
-/* TREE cards */
-.tree-layout .card {
-  position: absolute;
-}
+/* ================= ICON ================= */
 
-/* ICON */
 .icon {
-  font-size: 28px;
-  margin-bottom: 8px;
+  font-size: 34px;
+  margin-bottom: 10px;
 }
 
-/* HOVER (NO transform here anymore) */
+/* ================= HOVER ================= */
+
 .card:hover {
   background: rgba(106, 13, 173, 0.85);
   color: white;
 
   box-shadow:
     0 20px 40px rgba(106, 13, 173, 0.35),
-    0 0 20px rgba(106, 13, 173, 0.4);
-
-  border: 1px solid rgba(255, 255, 255, 0.4);
+    0 0 25px rgba(106, 13, 173, 0.4);
 }
-/* CENTER CARD */
+
+/* ================= CENTER CARD ================= */
+
 .center {
   position: absolute;
-  left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
+  left: 36%;
+  
+  transform: translate(-50%, -50%); /* ONLY this */
+  z-index: 3;
 }
 
-/* ACTIVE CENTER */
+/* ACTIVE (LOCKED) */
 .card.active {
   background: #6a0dad;
   color: white;
-  box-shadow: 0 30px 60px rgba(106, 13, 173, 0.35);
+
+  box-shadow:
+    0 30px 60px rgba(106, 13, 173, 0.4),
+    0 0 40px rgba(106, 13, 173, 0.5);
 }
 
-/* BRANCH BASE */
+/* ================= BRANCH BASE ================= */
+
 .branch {
   position: absolute;
   top: 50%;
-  left: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
 }
 
-/* LEFT BRANCH */
+
+/* 🔥 FINAL PERFECT POSITIONING */
+
+/* CARD WIDTH = 340px */
+/* HALF = 170px */
+/* GAP = 100px */
+
 .branch.left {
-  transform: translate(-220%, -50%);
+  left: calc(50% - 170px - 340px - 100px);
 }
 
-/* RIGHT BRANCH */
 .branch.right {
-  transform: translate(120%, -50%);
+  left: calc(50% + 170px + 100px);
 }
 
-/* 🔥 HOVER LIFT (NO transform conflicts) */
-.center:hover {
-  top: calc(50% - 6px);
-}
+/* ================= BACK BUTTON ================= */
 
-.branch.left:hover,
-.branch.right:hover {
-  top: calc(50% - 6px);
-}
-
-/* CONNECTOR LINES */
-.branch::before {
-  content: "";
-  position: absolute;
-  height: 2px;
-  width: 80px;
-  top: 50%;
-  background: linear-gradient(to right, #c4b5fd, #6a0dad);
-}
-
-.branch.left::before {
-  right: -80px;
-}
-
-.branch.right::before {
-  left: -80px;
-}
-
-/* BACK BUTTON */
 .back {
   position: absolute;
-  top: -80px;
-  left: -80px;
-  font-size: 22px;
+  top: 80px;
+  left: 80px;
+
+  font-size: 24px;
   color: #6a0dad;
+
   cursor: pointer;
   transition: 0.3s;
 }
@@ -164,9 +171,44 @@
   transform: scale(1.2);
 }
 
+/* ================= CONNECTORS ================= */
+
+.connectors {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+
+  z-index: 1; /* below cards */
+}
+
+/* CURVED LINE STYLE */
+.connector-path {
+  fill: none;
+  stroke: url(#gradientStroke);
+  stroke-width: 3;
+
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+
+  animation: drawLine 0.8s ease forwards;
+}
+
+/* DRAW ANIMATION */
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ================= CARD SHINE EFFECT ================= */
+
 .card::after {
   content: "";
   position: absolute;
+
   top: -50%;
   left: -50%;
   width: 200%;
@@ -181,6 +223,7 @@
 
   transform: rotate(25deg);
   opacity: 0;
+
   transition: 0.5s;
 }
 
@@ -189,91 +232,70 @@
   left: 100%;
 }
 
-.connectors {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1; /* 🔥 ADD THIS */
-}
-
-/* Cards ABOVE lines */
-.tree-layout .card {
-  position: absolute;
-  z-index: 2;
-}
-
-/* Curved line style */
-.connector-path {
-  fill: none;
-  stroke: url(#gradientStroke);
-  stroke-width: 3;
-
-  stroke-dasharray: 300;
-  stroke-dashoffset: 300;
-
-  animation: drawLine 0.8s ease forwards;
-}
-
-/* Animation */
-@keyframes drawLine {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-/* ================= BACKGROUND ANIMATION ================= */
+/* ================= BACKGROUND ================= */
 
 .bg-animation {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   overflow: hidden;
 
   z-index: 0;
   pointer-events: none;
 }
 
-/* GLOW BLOBS */
+/* 🔥 GLOW BLOBS (smooth, no jitter) */
 .bg-animation::before {
   content: "";
   position: absolute;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(106,13,173,0.25), transparent 70%);
-  top: -100px;
-  left: -100px;
-  animation: floatGlow 12s infinite ease-in-out;
+  width: 700px;
+  height: 700px;
+
+  background: radial-gradient(
+    circle,
+    rgba(106, 13, 173, 0.25),
+    transparent 70%
+  );
+
+  top: -150px;
+  left: -150px;
+
+  animation: floatGlow 14s infinite ease-in-out;
 }
 
 .bg-animation::after {
   content: "";
   position: absolute;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(196,181,253,0.25), transparent 70%);
-  bottom: -120px;
-  right: -120px;
-  animation: floatGlow 15s infinite ease-in-out reverse;
+  width: 600px;
+  height: 600px;
+
+  background: radial-gradient(
+    circle,
+    rgba(196, 181, 253, 0.25),
+    transparent 70%
+  );
+
+  bottom: -150px;
+  right: -150px;
+
+  animation: floatGlow 16s infinite ease-in-out reverse;
 }
 
-/* PARTICLES */
+/* ================= PARTICLES ================= */
+
 .bg-animation span {
   position: absolute;
   bottom: -10px;
+
   width: 6px;
   height: 6px;
-  background: rgba(106, 13, 173, 0.4);
+
+  background: rgba(106, 13, 173, 0.35);
   border-radius: 50%;
 
   animation: floatParticles linear infinite;
 }
 
-/* PARTICLE ANIMATION */
+/* PARTICLE FLOAT */
 @keyframes floatParticles {
   from {
     transform: translateY(0);
@@ -291,9 +313,27 @@
     transform: translate(0, 0);
   }
   50% {
-    transform: translate(60px, 40px);
+    transform: translate(80px, 50px);
   }
   100% {
     transform: translate(0, 0);
   }
+}
+
+/* ================= MICRO POLISH ================= */
+
+/* smoother hover feel */
+.card {
+  will-change: transform, opacity;
+}
+
+/* prevent text flicker */
+.card,
+.title {
+  backface-visibility: hidden;
+}
+
+.tree-layout {
+  transform: translate(-50%, -50%);
+  display: block;
 }

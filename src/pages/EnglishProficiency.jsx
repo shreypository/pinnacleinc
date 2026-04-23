@@ -5,11 +5,11 @@ import "./EnglishProficiency.css";
 export default function EnglishProficiency() {
   const navigate = useNavigate();
 
-  // ✅ Mouse Glow (stable)
+  // 🖱️ Mouse Glow (scoped)
   useEffect(() => {
-    const glow = document.querySelector(".mouse-glow");
-
     const move = (e) => {
+      const glow = document.querySelector(".ep-mouse-glow");
+
       if (glow) {
         glow.style.left = e.clientX - 150 + "px";
         glow.style.top = e.clientY - 150 + "px";
@@ -20,7 +20,31 @@ export default function EnglishProficiency() {
     return () => window.removeEventListener("mousemove", move);
   }, []);
 
-  // ✅ Stable 3D Tilt (no flicker)
+  // ✨ Particle interaction (scoped)
+  useEffect(() => {
+    const particles = document.querySelectorAll(".ep-particle");
+
+    const handleMove = (e) => {
+      particles.forEach((p) => {
+        const rect = p.getBoundingClientRect();
+        const dx = e.clientX - (rect.left + rect.width / 2);
+        const dy = e.clientY - (rect.top + rect.height / 2);
+
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 120) {
+          p.style.transform = `translate(${-dx * 0.05}px, ${-dy * 0.05}px)`;
+        } else {
+          p.style.transform = `translate(0,0)`;
+        }
+      });
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    return () => window.removeEventListener("mousemove", handleMove);
+  }, []);
+
+  // 🎯 3D Tilt (clean + stable)
   const handleMouseMove = (e, card) => {
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -55,16 +79,27 @@ export default function EnglishProficiency() {
   ];
 
   return (
-    <div className="tests-container">
-      <div className="mouse-glow"></div>
+    <div className="ep-container">
 
-      <h1 className="title">English Proficiency Tests</h1>
+      {/* ✨ Particles */}
+      <div className="ep-particles">
+        {[...Array(20)].map((_, i) => (
+          <span className="ep-particle" key={i}></span>
+        ))}
+      </div>
 
-      <div className="card-grid">
+      {/* 🖱️ Mouse Glow */}
+      <div className="ep-mouse-glow"></div>
+
+      {/* 🔥 Centered Title */}
+      <h1 className="ep-title">English Proficiency Tests</h1>
+
+      {/* 🧩 Cards */}
+      <div className="ep-grid">
         {tests.map((test) => (
           <div
             key={test.name}
-            className="test-card"
+            className="ep-card"
             onClick={() => navigate(test.path)}
             onMouseMove={(e) => handleMouseMove(e, e.currentTarget)}
             onMouseLeave={(e) => handleMouseLeave(e.currentTarget)}
@@ -74,6 +109,7 @@ export default function EnglishProficiency() {
           </div>
         ))}
       </div>
+
     </div>
   );
 }
