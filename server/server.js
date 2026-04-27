@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const adminAuthRoutes = require("./routes/adminAuth");
+const Slot = require("./models/Slot");
+const createMeeting = require("./createMeeting");
 require("dotenv").config();
 
 const app = express();
@@ -49,34 +51,72 @@ app.post("/api/contact", async (req, res) => {
 });
 
 /* ================================
-   NEW: SCHEDULE MEETING
+   NEW: SCHEDULE MEETING (UPDATED)
 ================================ */
 app.post("/api/schedule-meeting", async (req, res) => {
   try {
     const { name, phone, service, date, time } = req.body;
 
+    console.log("📥 Incoming booking:", req.body);
+
     if (!name || !phone || !service || !date || !time) {
       return res.status(400).json({ message: "All fields required" });
     }
 
+    // 🚫 CHECK IF SLOT ALREADY BOOKED
+    const existing = await Slot.findOne({
+      date: String(date),
+      time: String(time),
+      isBooked: true
+    });
+
+    if (existing) {
+      return res.status(400).json({ message: "Slot already booked" });
+    }
+
+    // 🎥 CREATE GOOGLE MEET LINK
+    const meetLink = await createMeeting(date, time);
+
+    // ✅ SAVE SLOT
+    const newSlot = new Slot({
+      date: String(date),
+      time: String(time),
+      isBooked: true,
+      name,
+      phone,
+      service,
+      meetLink // 🔥 storing link
+    });
+
+    await newSlot.save();
+
+    // ✅ SAVE IN CONTACT
     const newContact = new Contact({
       name,
       phone,
       message: `Meeting Request:
 Services: ${service.join(", ")}
 Date: ${date}
-Time: ${time}`
+Time: ${time}
+Meet Link: ${meetLink || "Not generated"}`
     });
 
     await newContact.save();
 
-    console.log("📅 Meeting Saved:", req.body);
+    console.log("✅ Meeting + Meet link created");
 
-    res.status(200).json({ message: "Meeting scheduled successfully" });
+    res.status(200).json({
+      message: "Meeting scheduled successfully",
+      meetLink
+    });
 
   } catch (err) {
-    console.error("Error saving meeting:", err);
-    res.status(500).json({ message: "Error saving meeting" });
+    console.error("❌ BOOKING ERROR:", err);
+
+    res.status(500).json({
+      message: "Error booking meeting",
+      error: err.message
+    });
   }
 });
 
@@ -124,7 +164,6 @@ app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
-
 /* ================================
    ADMIN AUTH ROUTES
 ================================ */
@@ -155,6 +194,58 @@ app.delete("/api/contact/:id", async (req, res) => {
 });
 
 /* ================================
+   GET AVAILABLE SLOTS (FIXED)
+================================ */
+app.get("/api/slots", async (req, res) => {
+  try {
+    const { date } = req.query;
+
+    console.log("📅 Requested date:", date);
+
+    if (!date) {
+      return res.status(400).json({ message: "Date required" });
+    }
+
+    // ✅ DEFINE ALL POSSIBLE SLOTS
+    const allSlots = [];
+    for (let hour = 10; hour < 17; hour++) {
+      allSlots.push(`${hour}:00`);
+      allSlots.push(`${hour}:30`);
+    }
+
+    console.log("🕒 All slots:", allSlots);
+
+    // ✅ FETCH BOOKED SLOTS FROM DB
+    const booked = await Slot.find({
+      date: String(date),
+      isBooked: true
+    });
+
+    console.log("📦 Booked slots from DB:", booked);
+
+    // ✅ SAFETY CHECK
+    const bookedTimes = booked.map((s) => s.time || "");
+
+    // ✅ FILTER AVAILABLE SLOTS
+    const available = allSlots.filter(
+      (slot) => !bookedTimes.includes(slot)
+    );
+
+    console.log("✅ Available slots:", available);
+
+    res.status(200).json(available);
+
+  } catch (err) {
+    console.error("❌ SLOT FETCH ERROR:", err);
+
+    res.status(500).json({
+      message: "Error fetching slots",
+      error: err.message
+    });
+  }
+});
+
+/* ================================
    SERVER START
 ================================ */
 const PORT = process.env.PORT || 5000;
@@ -162,4 +253,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
-
