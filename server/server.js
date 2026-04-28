@@ -49,9 +49,8 @@ app.post("/api/contact", async (req, res) => {
     res.status(500).json({ message: "Error saving data" });
   }
 });
-
 /* ================================
-   NEW: SCHEDULE MEETING (UPDATED)
+   NEW: SCHEDULE MEETING (SAFE)
 ================================ */
 app.post("/api/schedule-meeting", async (req, res) => {
   try {
@@ -59,33 +58,46 @@ app.post("/api/schedule-meeting", async (req, res) => {
 
     console.log("📥 Incoming booking:", req.body);
 
-    if (!name || !phone || !service || !date || !time) {
-      return res.status(400).json({ message: "All fields required" });
+    // ✅ STRONG VALIDATION
+    if (!name || !phone || !date || !time || !service?.length) {
+      return res.status(400).json({
+        message: "All fields required"
+      });
     }
+
+    // ✅ NORMALIZE INPUT
+    const bookingDate = String(date);
+    const bookingTime = String(time);
 
     // 🚫 CHECK IF SLOT ALREADY BOOKED
     const existing = await Slot.findOne({
-      date: String(date),
-      time: String(time),
+      date: bookingDate,
+      time: bookingTime,
       isBooked: true
     });
 
     if (existing) {
-      return res.status(400).json({ message: "Slot already booked" });
+      return res.status(400).json({
+        message: "Slot already booked"
+      });
     }
 
     // 🎥 CREATE GOOGLE MEET LINK
-    const meetLink = await createMeeting(date, time);
+    const meetLink = await createMeeting(bookingDate, bookingTime);
+
+    if (!meetLink) {
+      console.warn("⚠️ Meet link not generated");
+    }
 
     // ✅ SAVE SLOT
     const newSlot = new Slot({
-      date: String(date),
-      time: String(time),
+      date: bookingDate,
+      time: bookingTime,
       isBooked: true,
       name,
       phone,
       service,
-      meetLink // 🔥 storing link
+      meetLink: meetLink || null
     });
 
     await newSlot.save();
@@ -96,18 +108,20 @@ app.post("/api/schedule-meeting", async (req, res) => {
       phone,
       message: `Meeting Request:
 Services: ${service.join(", ")}
-Date: ${date}
-Time: ${time}
+Date: ${bookingDate}
+Time: ${bookingTime}
 Meet Link: ${meetLink || "Not generated"}`
     });
 
     await newContact.save();
 
-    console.log("✅ Meeting + Meet link created");
+    console.log("✅ Meeting saved");
+    console.log("🔗 Meet Link:", meetLink || "Not generated");
 
+    // ✅ RESPONSE
     res.status(200).json({
       message: "Meeting scheduled successfully",
-      meetLink
+      meetLink: meetLink || null
     });
 
   } catch (err) {
@@ -194,17 +208,23 @@ app.delete("/api/contact/:id", async (req, res) => {
 });
 
 /* ================================
-   GET AVAILABLE SLOTS (FIXED)
+   GET AVAILABLE SLOTS (SAFE)
 ================================ */
+
 app.get("/api/slots", async (req, res) => {
   try {
     const { date } = req.query;
 
     console.log("📅 Requested date:", date);
 
+    // ✅ VALIDATION
     if (!date) {
-      return res.status(400).json({ message: "Date required" });
+      return res.status(400).json({
+        message: "Date is required"
+      });
     }
+
+    const bookingDate = String(date);
 
     // ✅ DEFINE ALL POSSIBLE SLOTS
     const allSlots = [];
@@ -213,22 +233,23 @@ app.get("/api/slots", async (req, res) => {
       allSlots.push(`${hour}:30`);
     }
 
-    console.log("🕒 All slots:", allSlots);
-
-    // ✅ FETCH BOOKED SLOTS FROM DB
+    // ✅ FETCH BOOKED SLOTS
     const booked = await Slot.find({
-      date: String(date),
+      date: bookingDate,
       isBooked: true
-    });
+    }).select("time"); // 🔥 only fetch time (optimized)
 
-    console.log("📦 Booked slots from DB:", booked);
+    // ✅ EXTRACT TIMES SAFELY
+    const bookedTimes = booked
+      .map((s) => s.time)
+      .filter(Boolean);
 
-    // ✅ SAFETY CHECK
-    const bookedTimes = booked.map((s) => s.time || "");
+    // ✅ REMOVE DUPLICATES (extra safety)
+    const uniqueBooked = [...new Set(bookedTimes)];
 
     // ✅ FILTER AVAILABLE SLOTS
     const available = allSlots.filter(
-      (slot) => !bookedTimes.includes(slot)
+      (slot) => !uniqueBooked.includes(slot)
     );
 
     console.log("✅ Available slots:", available);
@@ -236,7 +257,7 @@ app.get("/api/slots", async (req, res) => {
     res.status(200).json(available);
 
   } catch (err) {
-    console.error("❌ SLOT FETCH ERROR:", err);
+    console.error("❌ SLOT FETCH ERROR:", err.message);
 
     res.status(500).json({
       message: "Error fetching slots",

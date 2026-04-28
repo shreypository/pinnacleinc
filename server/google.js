@@ -1,10 +1,18 @@
 const { google } = require("googleapis");
 
-const auth = new google.auth.GoogleAuth({
-  keyFile: "credentials.json", // we will add this
-  scopes: ["https://www.googleapis.com/auth/calendar"]
+const oauth2Client = new google.auth.OAuth2(
+  process.env.CLIENT_ID,
+  process.env.CLIENT_SECRET,
+  "http://localhost:5000/oauth2callback"
+);
+
+oauth2Client.setCredentials({
+  refresh_token: process.env.REFRESH_TOKEN,
 });
 
-const calendar = google.calendar({ version: "v3", auth });
+const calendar = google.calendar({
+  version: "v3",
+  auth: oauth2Client,
+});
 
 module.exports = calendar;
