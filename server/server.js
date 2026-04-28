@@ -1,10 +1,16 @@
+const config = require("./config");
+console.log("ENV CHECK:");
+console.log("CLIENT_ID:", config.CLIENT_ID);
+console.log("CLIENT_SECRET:", config.CLIENT_SECRET);
+console.log("REFRESH_TOKEN:", config.REFRESH_TOKEN);
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const adminAuthRoutes = require("./routes/adminAuth");
 const Slot = require("./models/Slot");
 const createMeeting = require("./createMeeting");
-require("dotenv").config();
+
 
 const app = express();
 
@@ -17,7 +23,7 @@ app.use(express.json());
 /* ================================
    MONGODB CONNECTION
 ================================ */
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(config.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.log("❌ MongoDB Error:", err));
 
