@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./Contact.css";
 
+const API_BASE = "https://pinnacle-backend-pq2c.onrender.com";
+
 export default function Contact() {
 
   /* ================================
@@ -49,9 +51,7 @@ export default function Contact() {
   ================================= */
   const fetchSlots = async (selectedDate) => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/slots?date=${selectedDate}`
-      );
+      const res = await fetch(`${API_BASE}/api/slots?date=${selectedDate}`)
       const data = await res.json();
       setAvailableSlots(data);
     } catch (err) {
@@ -69,7 +69,7 @@ export default function Contact() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/schedule-meeting", {
+      const res = await fetch(`${API_BASE}/api/schedule-meeting`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -109,7 +109,7 @@ export default function Contact() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/parent-enquiry", {
+      const res = await fetch(`${API_BASE}/api/parent-enquiry`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
