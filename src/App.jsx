@@ -28,6 +28,7 @@ function App() {
     <div className="app">
 
       <Navbar />
+      <div className="nav-spacer"></div> {/* ✅ ADD THIS */}
 
       <main className="main-content">
         <Routes>
@@ -40,17 +41,17 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/sat" element={<Sat />} />
-<Route path="/act" element={<Act />} />
-<Route path="/gre" element={<Gre />} />
-<Route path="/gmat" element={<Gmat />} />
-<Route path="/english-tests" element={<EnglishProficiency />} />
-<Route path="/ielts" element={<Ielts />} />
-<Route path="/toefl" element={<Toefl />} />
-<Route path="/pte" element={<Pte />} />
-<Route path="/visa" element={<Visa />} />
-<Route path="/flights-hotels" element={<FlightsHotels />} />
-<Route path="/insurance" element={<Insurance />} />
-<Route path="/college" element={<Counselling />} />
+          <Route path="/act" element={<Act />} />
+          <Route path="/gre" element={<Gre />} />
+          <Route path="/gmat" element={<Gmat />} />
+          <Route path="/english-tests" element={<EnglishProficiency />} />
+          <Route path="/ielts" element={<Ielts />} />
+          <Route path="/toefl" element={<Toefl />} />
+          <Route path="/pte" element={<Pte />} />
+          <Route path="/visa" element={<Visa />} />
+          <Route path="/flights-hotels" element={<FlightsHotels />} />
+          <Route path="/insurance" element={<Insurance />} />
+          <Route path="/college" element={<Counselling />} />
         </Routes>
       </main>
 

@@ -16,7 +16,10 @@ export default function Contact() {
     time: ""
   });
 
+  const [meetLink, setMeetLink] = useState("");
   const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   /* ================================
      PARENT FORM
@@ -47,26 +50,31 @@ export default function Contact() {
   ];
 
   /* ================================
-     FETCH AVAILABLE SLOTS
+     FETCH SLOTS
   ================================= */
   const fetchSlots = async (selectedDate) => {
+    setSlotsLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/slots?date=${selectedDate}`)
+      const res = await fetch(
+        `${API_BASE}/api/slots?date=${selectedDate}`
+      );
       const data = await res.json();
       setAvailableSlots(data);
     } catch (err) {
       console.error("Error fetching slots", err);
     }
+    setSlotsLoading(false);
   };
 
   /* ================================
-     HANDLE MEETING SUBMIT
+     MEETING SUBMIT
   ================================= */
   const handleMeetingSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setSuccess("");
     setError("");
+    setMeetLink("");
 
     try {
       const res = await fetch(`${API_BASE}/api/schedule-meeting`, {
@@ -81,6 +89,10 @@ export default function Contact() {
       if (!res.ok) throw new Error(data.message);
 
       setSuccess("Meeting scheduled successfully!");
+
+      if (data.meetLink) {
+        setMeetLink(data.meetLink);
+      }
 
       setMeetingForm({
         name: "",
@@ -100,7 +112,7 @@ export default function Contact() {
   };
 
   /* ================================
-     HANDLE PARENT SUBMIT
+     PARENT SUBMIT
   ================================= */
   const handleParentSubmit = async (e) => {
     e.preventDefault();
@@ -138,175 +150,315 @@ export default function Contact() {
   };
 
   return (
-  <section className="contact-page">
-    <div className="container contact-wrapper">
+    <section className="contact-page">
 
-      {/* ================= LEFT — MEETING ================= */}
-      <div className="contact-info">
-        <h1>Schedule a Meeting</h1>
-        <p>Select services, date and time. We’ll connect with you.</p>
-
-        <form className="contact-form" onSubmit={handleMeetingSubmit}>
-
-          {/* NAME */}
-          <input
-            type="text"
-            placeholder="Your Name"
-            value={meetingForm.name}
-            onChange={(e) =>
-              setMeetingForm({ ...meetingForm, name: e.target.value })
-            }
-            required
-          />
-
-          {/* PHONE */}
-          <input
-            type="text"
-            placeholder="Phone Number"
-            value={meetingForm.phone}
-            onChange={(e) =>
-              setMeetingForm({ ...meetingForm, phone: e.target.value })
-            }
-            required
-          />
-
-          {/* SERVICES */}
-          <div className="checkbox-group">
-            {servicesList.map((service) => (
-              <label key={service} className="checkbox-item">
-                <input
-                  type="checkbox"
-                  checked={meetingForm.service.includes(service)}
-                  onChange={(e) => {
-                    const updated = e.target.checked
-                      ? [...meetingForm.service, service]
-                      : meetingForm.service.filter((s) => s !== service);
-
-                    setMeetingForm({ ...meetingForm, service: updated });
-                  }}
-                />
-                {service}
-              </label>
-            ))}
-          </div>
-
-          {/* DATE */}
-          <input
-            type="date"
-            value={meetingForm.date}
-            onChange={(e) => {
-              setMeetingForm({ ...meetingForm, date: e.target.value });
-              fetchSlots(e.target.value);
-            }}
-            required
-          />
-
-          {/* ✅ SLOT DROPDOWN (REPLACES TIME INPUT) */}
-          <select
-            value={meetingForm.time}
-            onChange={(e) =>
-              setMeetingForm({ ...meetingForm, time: e.target.value })
-            }
-            required
-          >
-            <option value="">Select Time Slot</option>
-
-            {availableSlots.length === 0 ? (
-              <option disabled>No slots available</option>
-            ) : (
-              availableSlots.map((slot) => (
-                <option key={slot} value={slot}>
-                  {slot}
-                </option>
-              ))
-            )}
-          </select>
-
-          {/* BUTTON */}
-          <button className="primary-btn" disabled={loading}>
-            {loading ? "Scheduling..." : "Schedule Meeting"}
-          </button>
-
-        </form>
+      {/* ================= SOCIAL BAR ================= */}
+      <div className="social-bar">
+        <a href="https://www.instagram.com/_pinnacleinc" target="_blank">Instagram</a>
+        <a href="https://www.facebook.com/share/1GqyNJYzrN" target="_blank">Facebook</a>
+        <a href="https://youtube.com/@studyabroadwithpinnacle" target="_blank">YouTube</a>
+        <a href="https://www.linkedin.com/company/pinnacleincorporated/" target="_blank">LinkedIn</a>
+        <a href="https://www.reddit.com/u/PinnacleInc/" target="_blank">Reddit</a>
       </div>
 
-      {/* ================= RIGHT — PARENT ================= */}
-      <form className="contact-form" onSubmit={handleParentSubmit}>
+      <div className="container contact-wrapper">
+                {/* ================= LEFT — MEETING ================= */}
+        <div className="contact-card premium-card">
 
-        <h2>Student & Parent Details</h2>
+          <h1 className="section-title">Schedule a Meeting</h1>
+          <p className="section-subtitle">
+            Select services, date and choose your preferred time slot.
+          </p>
 
-        <input
-          type="text"
-          placeholder="Student Name"
-          value={parentForm.studentName}
-          onChange={(e) =>
-            setParentForm({ ...parentForm, studentName: e.target.value })
-          }
-          required
-        />
+          <form className="contact-form" onSubmit={handleMeetingSubmit}>
 
-        <input
-          type="text"
-          placeholder="Student Contact"
-          value={parentForm.studentPhone}
-          onChange={(e) =>
-            setParentForm({ ...parentForm, studentPhone: e.target.value })
-          }
-          required
-        />
+            {/* NAME */}
+            <input
+              type="text"
+              placeholder="Your Name"
+              value={meetingForm.name}
+              onChange={(e) =>
+                setMeetingForm({ ...meetingForm, name: e.target.value })
+              }
+              required
+            />
 
-        <input
-          type="text"
-          placeholder="Parent Name"
-          value={parentForm.parentName}
-          onChange={(e) =>
-            setParentForm({ ...parentForm, parentName: e.target.value })
-          }
-          required
-        />
+            {/* PHONE */}
+            <input
+              type="text"
+              placeholder="Phone Number"
+              value={meetingForm.phone}
+              onChange={(e) =>
+                setMeetingForm({ ...meetingForm, phone: e.target.value })
+              }
+              required
+            />
 
-        <input
-          type="text"
-          placeholder="Parent Contact"
-          value={parentForm.parentPhone}
-          onChange={(e) =>
-            setParentForm({ ...parentForm, parentPhone: e.target.value })
-          }
-          required
-        />
+            {/* ================= SERVICES ================= */}
+            <div className="services-section">
+              <p className="label">Select Services</p>
 
-        {/* SERVICES */}
-        <div className="checkbox-group">
-          {servicesList.map((service) => (
-            <label key={service} className="checkbox-item">
-              <input
-                type="checkbox"
-                checked={parentForm.services.includes(service)}
-                onChange={(e) => {
-                  const updated = e.target.checked
-                    ? [...parentForm.services, service]
-                    : parentForm.services.filter((s) => s !== service);
+              <div className="services-grid">
+                {servicesList.map((service) => (
+                  <button
+                    key={service}
+                    type="button"
+                    className={`service-chip ${
+                      meetingForm.service.includes(service) ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      const updated = meetingForm.service.includes(service)
+                        ? meetingForm.service.filter((s) => s !== service)
+                        : [...meetingForm.service, service];
 
-                  setParentForm({ ...parentForm, services: updated });
-                }}
-              />
-              {service}
-            </label>
-          ))}
+                      setMeetingForm({
+                        ...meetingForm,
+                        service: updated
+                      });
+                    }}
+                  >
+                    {service}
+                  </button>
+                ))}
+              </div>
+
+              {meetingForm.service.length > 0 && (
+                <p className="selected-count">
+                  {meetingForm.service.length} selected
+                </p>
+              )}
+            </div>
+
+            {/* DATE */}
+            <input
+              type="date"
+              value={meetingForm.date}
+              onChange={(e) => {
+                setMeetingForm({ ...meetingForm, date: e.target.value });
+                fetchSlots(e.target.value);
+              }}
+              required
+            />
+
+            {/* ================= SLOTS ================= */}
+            <div className="slots-container">
+
+              {slotsLoading ? (
+                <p className="no-slots">Loading slots...</p>
+              ) : availableSlots.length === 0 ? (
+                <p className="no-slots">No slots available</p>
+              ) : (
+                availableSlots.map((slot) => (
+                  <button
+                    key={slot}
+                    type="button"
+                    className={`slot-btn ${
+                      meetingForm.time === slot ? "active" : ""
+                    }`}
+                    onClick={() =>
+                      setMeetingForm({ ...meetingForm, time: slot })
+                    }
+                  >
+                    {slot}
+                  </button>
+                ))
+              )}
+
+            </div>
+
+            {/* SUBMIT */}
+            <button className="primary-btn premium-btn" disabled={loading}>
+              {loading ? "Scheduling..." : "Schedule Meeting"}
+            </button>
+
+          </form>
+        </div>
+                {/* ================= RIGHT — PARENT ================= */}
+        <div className="contact-card premium-card">
+
+          <h1 className="section-title">Request a Call Back</h1>
+          <p className="section-subtitle">
+            Share your details and we will get back to you shortly.
+          </p>
+
+          <form className="contact-form" onSubmit={handleParentSubmit}>
+
+            <input
+              type="text"
+              placeholder="Student Name"
+              value={parentForm.studentName}
+              onChange={(e) =>
+                setParentForm({
+                  ...parentForm,
+                  studentName: e.target.value
+                })
+              }
+              required
+            />
+
+            <input
+              type="text"
+              placeholder="Student Contact"
+              value={parentForm.studentPhone}
+              onChange={(e) =>
+                setParentForm({
+                  ...parentForm,
+                  studentPhone: e.target.value
+                })
+              }
+              required
+            />
+
+            <input
+              type="text"
+              placeholder="Parent Name"
+              value={parentForm.parentName}
+              onChange={(e) =>
+                setParentForm({
+                  ...parentForm,
+                  parentName: e.target.value
+                })
+              }
+              required
+            />
+
+            <input
+              type="text"
+              placeholder="Parent Contact"
+              value={parentForm.parentPhone}
+              onChange={(e) =>
+                setParentForm({
+                  ...parentForm,
+                  parentPhone: e.target.value
+                })
+              }
+              required
+            />
+
+            {/* ================= SERVICES ================= */}
+            <div className="services-section">
+              <p className="label">Services Interested In</p>
+
+              <div className="services-grid">
+                {servicesList.map((service) => (
+                  <button
+                    key={service}
+                    type="button"
+                    className={`service-chip ${
+                      parentForm.services.includes(service) ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      const updated = parentForm.services.includes(service)
+                        ? parentForm.services.filter((s) => s !== service)
+                        : [...parentForm.services, service];
+
+                      setParentForm({
+                        ...parentForm,
+                        services: updated
+                      });
+                    }}
+                  >
+                    {service}
+                  </button>
+                ))}
+              </div>
+
+              {parentForm.services.length > 0 && (
+                <p className="selected-count">
+                  {parentForm.services.length} selected
+                </p>
+              )}
+            </div>
+
+            <button className="primary-btn premium-btn" disabled={loading}>
+              {loading ? "Submitting..." : "Submit Details"}
+            </button>
+
+          </form>
         </div>
 
-        <button className="primary-btn" disabled={loading}>
-          {loading ? "Submitting..." : "Submit Details"}
-        </button>
+      </div>
 
-      </form>
+      {/* ================= STATUS ================= */}
+      {success && <p className="success-msg">✅ {success}</p>}
+      {error && <p className="error-msg">❌ {error}</p>}
 
+      {/* ================= MEET LINK ================= */}
+      {meetLink && (
+  <div className="meet-link-box premium-link">
+    <p>Your meeting is scheduled!</p>
+
+    <div className="meet-actions">
+      <a href={meetLink} target="_blank" rel="noopener noreferrer">
+        Join Google Meet
+      </a>
+
+      {/* COPY ICON */}
+      <span
+  className="copy-icon"
+  onClick={() => {
+    navigator.clipboard.writeText(meetLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }}
+>
+  {copied ? "✅" : "📋"}
+</span>
     </div>
+  </div>
+)}
 
-    {/* STATUS */}
-    {success && <p className="success-msg">✅ {success}</p>}
-    {error && <p className="error-msg">❌ {error}</p>}
+      {/* ================= CONTACT DETAILS ================= */}
+      <div className="contact-details">
 
-  </section>
-);
+        <div className="detail-card">
+          <h2>Visit Us</h2>
+          <p>
+            Pinnacle Inc.<br />
+            C/o Hustle Space Co work<br />
+            No. 483, 484, Nimishamba Square,<br />
+            Amrutahalli Main Road,<br />
+            Bangalore, KA - 560092
+          </p>
+          <a href="https://share.google/fq8GUvdouJXcO3ukb" target="_blank">
+            View on Map
+          </a>
+        </div>
+
+        <div className="detail-card">
+          <h2>Contact</h2>
+
+          <p>
+            📞 <a href="tel:9632976007">9632976007</a><br />
+            📞 <a href="tel:9731490933">9731490933</a>
+          </p>
+
+          <p>
+            ✉ <a href="mailto:purusharth@pinnacleinc.com">
+              purusharth@pinnacleinc.com
+            </a><br />
+            ✉ <a href="mailto:chethan@pinnacleinc.com">
+              chethan@pinnacleinc.com
+            </a>
+          </p>
+        </div>
+
+        <div className="detail-card">
+          <h2>Founders</h2>
+
+          <p>
+            <strong>Purusharth Agarwal</strong><br />
+            Academic & Executive Founder
+          </p>
+
+          <p>
+            <strong>Chethan M</strong><br />
+            Business & Strategic Founder
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+  );
 }

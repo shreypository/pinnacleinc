@@ -1,169 +1,496 @@
 /* ================================
-   CONTACT PAGE
+   GLOBAL PAGE
 ================================ */
+
 .contact-page {
-  padding: 80px 0;
+  padding: 0 0 80px 0; /* remove top gap */
+  font-family: Georgia, serif;
+
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #f8f5ff 50%,
+    #ffffff 100%
+  );
 }
 
 /* ================================
-   WRAPPER (2 COLUMN LAYOUT)
+   SOCIAL BAR
+================================ */
+.social-bar {
+  width: 100%;
+  background: linear-gradient(135deg, #6a0dad, #8a2be2);
+
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+
+  padding: 14px 0;
+  margin-bottom: 40px;
+
+  box-shadow: 0 8px 20px rgba(106, 13, 173, 0.25);
+}
+
+.social-bar a {
+  color: white;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+
+  transition: all 0.3s ease;
+}
+
+.social-bar a:hover {
+  transform: translateY(-2px);
+  opacity: 0.85;
+}
+
+/* ================================
+   WRAPPER (MAIN LAYOUT)
 ================================ */
 .contact-wrapper {
   display: flex;
   gap: 40px;
+  justify-content: center;
   align-items: flex-start;
-  justify-content: space-between;
+
   flex-wrap: wrap;
+  padding: 0 20px;
 }
 
 /* ================================
-   LEFT SIDE (MEETING CARD)
+   CARD BASE
 ================================ */
-.contact-info {
+.contact-card {
   flex: 1;
-  min-width: 320px;
-  background: #fafafa;
-  padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 600px;
+
+  padding: 35px;
+  border-radius: 20px;
+
+  transition: all 0.3s ease;
 }
 
-.contact-info h1 {
-  font-size: 30px;
-  margin-bottom: 10px;
+/* ================================
+   PREMIUM CARD
+================================ */
+.premium-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.08),
+    0 8px 25px rgba(106, 13, 173, 0.08);
 }
 
-.contact-info p {
-  color: #555;
-  margin-bottom: 20px;
+.premium-card:hover {
+  transform: translateY(-6px);
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.12),
+    0 12px 35px rgba(106, 13, 173, 0.15);
+}
+
+/* ================================
+   HEADINGS
+================================ */
+.section-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #111;
+
+  margin-bottom: 8px;
+}
+
+.section-subtitle {
+  font-size: 15px;
+  color: #666;
+
+  margin-bottom: 25px;
   line-height: 1.6;
 }
 
 /* ================================
-   RIGHT SIDE (FORM CARD)
+   FORM
 ================================ */
 .contact-form {
-  flex: 1;
-  min-width: 320px;
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
-.contact-form h2 {
+/* ================================
+   INPUTS
+================================ */
+.contact-form input {
+  padding: 14px 16px;
+
+  border-radius: 12px;
+  border: 1px solid #e2e2e2;
+
+  font-size: 15px;
+  font-family: Georgia, serif;
+
+  background: #fafafa;
+
+  transition: all 0.25s ease;
+}
+
+.contact-form input:focus {
+  outline: none;
+
+  border-color: #6a0dad;
+  background: #ffffff;
+
+  box-shadow: 0 0 0 3px rgba(106, 13, 173, 0.15);
+}
+
+/* ================================
+   SERVICES SECTION
+================================ */
+.services-section {
+  margin-top: 10px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+
   margin-bottom: 10px;
 }
 
 /* ================================
-   INPUT FIELDS
+   SERVICES GRID (CLUSTER FIX)
 ================================ */
-.contact-form input {
-  padding: 14px 16px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  font-size: 15px;
-  transition: all 0.2s ease;
-}
+.services-grid {
+  display: grid;
 
-/* FOCUS EFFECT */
-.contact-form input:focus {
-  outline: none;
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+
+  width: 100%;
 }
 
 /* ================================
-   CHECKBOX GROUP
+   SERVICE CHIP (PREMIUM UI)
 ================================ */
-.checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 5px;
-}
+.service-chip {
+  padding: 12px 14px;
+  border-radius: 999px;
 
-/* EACH ITEM */
-.checkbox-item {
+  border: 1px solid rgba(106, 13, 173, 0.25);
+
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(6px);
+
+  color: #6a0dad;
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 15px;
-  cursor: pointer;
-  padding: 10px 12px;
-  border-radius: 10px;
-  transition: 0.2s;
-  border: 1px solid transparent;
+  justify-content: center;
+
+  transition: all 0.25s ease;
 }
 
 /* HOVER EFFECT */
-.checkbox-item:hover {
-  background: rgba(124, 58, 237, 0.08);
+.service-chip:hover {
+  transform: translateY(-2px) scale(1.03);
+
+  background: rgba(106, 13, 173, 0.08);
+
+  box-shadow: 0 8px 20px rgba(106, 13, 173, 0.15);
 }
 
-/* CHECKED STATE (NICE HIGHLIGHT) */
-.checkbox-item input:checked + span,
-.checkbox-item input:checked {
-  accent-color: #7c3aed;
-}
+/* ACTIVE (SELECTED STATE) */
+.service-chip.active {
+  background: linear-gradient(135deg, #6a0dad, #8a2be2);
+  color: white;
 
-/* OPTIONAL: highlight entire row when checked */
-.checkbox-item input:checked {
-  transform: scale(1.1);
+  border: none;
+
+  box-shadow: 0 10px 25px rgba(106, 13, 173, 0.35);
 }
 
 /* ================================
-   BUTTON
+   SELECTED COUNT
+================================ */
+.selected-count {
+  margin-top: 8px;
+
+  font-size: 13px;
+  color: #6a0dad;
+  font-weight: 500;
+
+  text-align: right;
+}
+
+/* ================================
+   SLOTS CONTAINER
+================================ */
+.slots-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  margin-top: 10px;
+}
+
+/* ================================
+   SLOT BUTTONS
+================================ */
+.slot-btn {
+  padding: 10px 14px;
+
+  border-radius: 10px;
+  border: 1px solid #6a0dad;
+
+  background: white;
+  color: #6a0dad;
+
+  font-size: 14px;
+  font-family: Georgia, serif;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.slot-btn:hover {
+  background: rgba(106, 13, 173, 0.1);
+
+  transform: translateY(-2px);
+}
+
+.slot-btn.active {
+  background: #6a0dad;
+  color: white;
+
+  box-shadow: 0 5px 15px rgba(106, 13, 173, 0.3);
+}
+
+/* ================================
+   NO SLOTS TEXT
+================================ */
+.no-slots {
+  font-size: 14px;
+  color: #777;
+}
+
+/* ================================
+   PRIMARY BUTTON
 ================================ */
 .primary-btn {
   margin-top: 10px;
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
-  color: white;
-  border: none;
+
   padding: 14px;
-  border-radius: 12px;
+  border-radius: 14px;
+
   font-weight: 600;
+  font-size: 15px;
+  font-family: Georgia, serif;
+
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.3s ease;
 }
 
-.primary-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+/* PREMIUM BUTTON */
+.premium-btn {
+  background: linear-gradient(135deg, #6a0dad, #8a2be2);
+  color: white;
+
+  border: none;
+
+  box-shadow: 0 10px 25px rgba(106, 13, 173, 0.3);
 }
 
-/* DISABLED */
+.premium-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+
+  box-shadow: 0 15px 35px rgba(106, 13, 173, 0.4);
+}
+
+.premium-btn:active {
+  transform: scale(0.97);
+}
+
 .primary-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 /* ================================
-   SUCCESS / ERROR MESSAGES
+   STATUS MESSAGES
 ================================ */
 .success-msg {
-  margin-top: 20px;
+  margin-top: 30px;
   text-align: center;
+
   color: green;
   font-weight: 600;
 }
 
 .error-msg {
-  margin-top: 20px;
+  margin-top: 30px;
   text-align: center;
+
   color: red;
   font-weight: 600;
 }
 
 /* ================================
-   RESPONSIVE
+   MEET LINK BOX (PREMIUM)
+================================ */
+.meet-link-box {
+  margin-top: 25px;
+
+  padding: 18px;
+  border-radius: 14px;
+
+  text-align: center;
+
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.premium-link {
+  background: rgba(106, 13, 173, 0.08);
+  backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(106, 13, 173, 0.15);
+
+  box-shadow: 0 10px 30px rgba(106, 13, 173, 0.1);
+}
+
+.meet-link-box p {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.meet-link-box a {
+  color: #6a0dad;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.meet-link-box a:hover {
+  text-decoration: underline;
+}
+
+/* ================================
+   CONTACT DETAILS
+================================ */
+.contact-details {
+  margin-top: 60px;
+
+  display: flex;
+  gap: 30px;
+
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.detail-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+
+  padding: 25px;
+  border-radius: 16px;
+
+  width: 280px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+
+  transition: all 0.3s ease;
+}
+
+.detail-card:hover {
+  transform: translateY(-4px);
+
+  box-shadow: 0 15px 40px rgba(106, 13, 173, 0.15);
+}
+
+.detail-card h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: #111;
+}
+
+.detail-card p {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.detail-card a {
+  color: #6a0dad;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.detail-card a:hover {
+  text-decoration: underline;
+}
+
+/* ================================
+   RESPONSIVE DESIGN
 ================================ */
 @media (max-width: 768px) {
+
   .contact-wrapper {
     flex-direction: column;
+    align-items: center;
   }
+
+  .contact-card {
+    max-width: 100%;
+  }
+
+  .services-grid {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  }
+
+  .contact-details {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .detail-card {
+    width: 100%;
+    max-width: 350px;
+  }
+}
+
+/* ================================
+   MEET ACTIONS
+================================ */
+.meet-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* ================================
+   COPY ICON
+================================ */
+.copy-icon {
+  cursor: pointer;
+  font-size: 18px;
+
+  transition: all 0.2s ease;
+}
+
+.copy-icon:hover {
+  transform: scale(1.2);
+  opacity: 0.8;
 }
