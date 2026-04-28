@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets
+.env
+server/credentials.json
+
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log
