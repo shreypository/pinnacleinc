@@ -4,7 +4,42 @@
  * dotenv silently ignores a missing .env file, which is correct for production.
  */
 const path = require("path");
+const dns = require("dns");
+
+/* ──────────────────────────────────────────────────────────────
+   GLOBAL IPv4-FIRST DNS ORDER  (the real ENETUNREACH fix)
+   Node 17+ defaults to resultOrder="verbatim", which can return a
+   host's IPv6 (AAAA) address first. smtp.gmail.com has both A and
+   AAAA records; Render has NO outbound IPv6 → connecting to the
+   IPv6 address gives `ENETUNREACH 2607:f8b0:...:465`.
+
+   The nodemailer `family:4` transport option does NOT reliably reach
+   the underlying dns.lookup, so we fix it at the DNS layer for the
+   whole process. This affects every outbound socket (SMTP included).
+   Verified: with ipv4first, dns.lookup("smtp.gmail.com") → IPv4.
+─────────────────────────────────────────────────────────────── */
+if (typeof dns.setDefaultResultOrder === "function") {
+  dns.setDefaultResultOrder("ipv4first");
+}
+
 require("dotenv").config({ path: path.join(__dirname, ".env") });
+
+/* ── Startup DNS diagnostic — prints the REAL resolved address + family ── */
+(() => {
+  const smtpHost = process.env.EMAIL_HOST || "smtp.gmail.com";
+  const order = typeof dns.getDefaultResultOrder === "function" ? dns.getDefaultResultOrder() : "n/a";
+  // Default lookup (this is what net.connect/nodemailer actually uses)
+  dns.lookup(smtpHost, (err, address, family) => {
+    if (err) {
+      console.error(`[DNS] startup lookup ${smtpHost} FAILED: ${err.code || err.message}`);
+    } else {
+      console.log(`[DNS] ${smtpHost} → ${address} (IPv${family}) | resultOrder=${order}`);
+      if (family === 6) {
+        console.error("[DNS] ⚠️  Resolved to IPv6 — outbound will fail on IPv4-only hosts (Render).");
+      }
+    }
+  });
+})();
 
 /* ── Startup validation ── */
 const required = ["MONGO_URI", "JWT_SECRET"];

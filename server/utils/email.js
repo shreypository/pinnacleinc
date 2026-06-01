@@ -1,5 +1,19 @@
 const nodemailer = require("nodemailer");
+const dns = require("dns");
 const config = require("../env");
+
+/* Custom DNS lookup that HARD-forces IPv4 and logs the resolved IP at
+   connect time. This is passed to the transport so we don't depend on
+   nodemailer forwarding `family:4` to the socket. It also gives a
+   definitive runtime answer to "is the transport using IPv4 or IPv6?". */
+const ipv4Lookup = (hostname, options, callback) => {
+  if (typeof options === "function") { callback = options; options = {}; }
+  return dns.lookup(hostname, { ...options, family: 4 }, (err, address, family) => {
+    if (err) console.error(`[EMAIL DNS] lookup ${hostname} failed: ${err.code || err.message}`);
+    else console.log(`[EMAIL DNS] connecting to ${hostname} → ${address} (IPv${family})`);
+    callback(err, address, family);
+  });
+};
 
 /*
   EMAIL DELIVERY — Pinnacle
@@ -38,8 +52,9 @@ const buildTransport = (port, secure) =>
   nodemailer.createTransport({
     host: HOST,
     port,
-    secure,          // true → SSL (465); false → STARTTLS (587)
-    family: 4,       // force IPv4 — fixes ENETUNREACH on Render
+    secure,            // true → SSL (465); false → STARTTLS (587)
+    family: 4,         // hint to nodemailer
+    lookup: ipv4Lookup, // ← authoritative: forces IPv4 at the socket DNS layer
     auth: {
       user: config.EMAIL_USER,
       pass: config.EMAIL_PASS
