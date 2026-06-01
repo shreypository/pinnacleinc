@@ -1,0 +1,550 @@
+/* ═══════════════════════════════════════════════
+   ADMIN.CSS — FULLY ISOLATED
+   Every selector is prefixed .admin-page or
+   uses a unique admin-* class name so nothing
+   leaks into other pages.
+   Element selectors (table/tr/th/td) are scoped
+   under .admin-page to prevent site-wide bleed.
+═══════════════════════════════════════════════ */
+
+/* ── Font override: beats App.css's * { Georgia } via higher specificity ── */
+.admin-page,
+.admin-page * {
+  font-family: "Inter", sans-serif;
+  box-sizing: border-box;
+}
+
+/* ── Root wrapper ── */
+.admin-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fb, #eef1f7);
+}
+
+/* ── Main container ── */
+.admin-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 30px;
+}
+
+/* ── Header ── */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.admin-header h1 {
+  font-size: 30px;
+  font-weight: 700;
+  color: #1e1e2f;
+}
+
+/* ── Login screen ── */
+.admin-login-bg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.admin-login-card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  width: 320px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-login-card input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  outline: none;
+  transition: 0.3s;
+  font-family: "Inter", sans-serif;
+  font-size: 0.92rem;
+}
+
+.admin-login-card input:focus {
+  border-color: #6c5ce7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+/* ── Buttons ── */
+.admin-primary-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #6c5ce7, #7d5fff);
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.admin-primary-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+}
+
+.admin-primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-logout-btn {
+  background: #ff4d4f;
+  padding: 10px 18px;
+  border-radius: 8px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+  font-family: "Inter", sans-serif;
+}
+
+.admin-logout-btn:hover {
+  transform: scale(1.05);
+  background: #e84142;
+}
+
+.admin-delete-btn {
+  background: #ff6b6b;
+  border: none;
+  padding: 6px 12px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-family: "Inter", sans-serif;
+  font-size: 0.82rem;
+}
+
+.admin-delete-btn:hover {
+  transform: scale(1.08);
+  background: #e55050;
+}
+
+.admin-toggle-btn {
+  background: #e4e7ec;
+  border: none;
+  padding: 6px 12px;
+  color: #333;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  transition: 0.2s;
+  font-family: "Inter", sans-serif;
+}
+
+.admin-toggle-btn:hover {
+  background: #d6d9e0;
+}
+
+/* ── Stats ── */
+.admin-stats-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.admin-stat-card {
+  flex: 1;
+  min-width: 100px;
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  transition: 0.3s;
+}
+
+.admin-stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.admin-stat-card h3 {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-stat-card p {
+  font-size: 28px;
+  font-weight: 700;
+  color: #6c5ce7;
+}
+
+.admin-glow-card {
+  background: linear-gradient(135deg, #6c5ce7, #7d5fff);
+  color: white;
+  box-shadow: 0 10px 30px rgba(108, 92, 231, 0.5);
+}
+
+.admin-glow-card h3,
+.admin-glow-card p {
+  color: white;
+}
+
+/* ── Controls ── */
+.admin-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-search-input {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  width: 260px;
+  outline: none;
+  transition: 0.3s;
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+}
+
+.admin-search-input:focus {
+  border-color: #6c5ce7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+/* ── Contact filter pills (scoped, not `.tabs`) ── */
+.admin-filter-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-filter-tabs button {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  background: #e4e7ec;
+  cursor: pointer;
+  transition: 0.3s;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+}
+
+.admin-filter-tabs button:hover {
+  background: #d6d9e0;
+}
+
+.admin-filter-tabs button.admin-filter-active {
+  background: linear-gradient(135deg, #6c5ce7, #7d5fff);
+  color: white;
+}
+
+/* ── Tab navigation bar ── */
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f1f3f9;
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.admin-tab-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #666;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+  font-family: "Inter", sans-serif;
+}
+
+.admin-tab-btn:hover {
+  background: #e4e7ec;
+  color: #333;
+}
+
+.admin-tab-btn.admin-tab-active {
+  background: white;
+  color: #6c5ce7;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.admin-tab-content {
+  min-height: 300px;
+}
+
+/* ── Status badges ── */
+.admin-status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.admin-status-badge.is-active   { background: rgba(52, 211, 153, 0.15); color: #059669; }
+.admin-status-badge.is-inactive { background: rgba(239, 68, 68, 0.1);   color: #dc2626; }
+.admin-status-badge.is-pending  { background: rgba(251, 191, 36, 0.15); color: #d97706; }
+.admin-status-badge.is-used     { background: rgba(52, 211, 153, 0.15); color: #059669; }
+.admin-status-badge.is-expired  { background: rgba(239, 68, 68, 0.1);   color: #dc2626; }
+
+/* ── Table wrapper ── */
+.admin-table-wrapper {
+  background: white;
+  border-radius: 14px;
+  padding: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+/* ── Table elements — SCOPED under .admin-page ── */
+.admin-page table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Inter", sans-serif;
+}
+
+.admin-page th {
+  padding: 14px;
+  text-align: left;
+  color: #555;
+  background: #f1f3f9;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.admin-page td {
+  padding: 12px;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.admin-page tr {
+  border-bottom: 1px solid #eee;
+  transition: background 0.2s;
+}
+
+/* No transform on tr:hover — that leaked site-wide previously */
+.admin-page tr:hover {
+  background: #f9fafc;
+}
+
+/* ── Forms ── */
+.admin-form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-form-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: "Inter", sans-serif;
+  background: #fafafa;
+}
+
+.admin-form-input:focus {
+  border-color: #6c5ce7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+.admin-form-textarea {
+  width: 100%;
+  min-height: 100px;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+
+.admin-file-label {
+  display: inline-block;
+  padding: 8px 14px;
+  background: #f1f3f9;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #555;
+  border: 1px dashed #ccc;
+  transition: background 0.2s;
+  font-family: "Inter", sans-serif;
+}
+
+.admin-file-label:hover {
+  background: #e4e7ec;
+}
+
+.admin-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #444;
+  cursor: pointer;
+}
+
+.admin-form-msg {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.87rem;
+  margin-bottom: 14px;
+}
+
+.admin-form-msg.success {
+  background: rgba(52, 211, 153, 0.12);
+  color: #059669;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.admin-form-msg.error {
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+/* ── Homework & Blog lists ── */
+.admin-hw-list,
+.admin-blog-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-hw-item,
+.admin-blog-item {
+  background: white;
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+
+.admin-hw-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-hw-category-badge {
+  display: inline-block;
+  background: rgba(108, 92, 231, 0.1);
+  color: #6c5ce7;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.admin-hw-files-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.admin-hw-file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f3f9;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  color: #444;
+}
+
+.admin-chip-del {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.admin-chip-del:hover {
+  color: #dc2626;
+}
+
+/* ── Generic card wrapper (used for forms/sections) ── */
+.admin-card {
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Animations (unique names, no conflict) ── */
+.admin-fade-in {
+  animation: adminFadeIn 0.8s ease forwards;
+}
+
+.admin-fade-in-up {
+  animation: adminFadeUp 0.8s ease forwards;
+}
+
+.admin-delay-1 { animation-delay: 0.2s; }
+.admin-delay-2 { animation-delay: 0.4s; }
+.admin-delay-3 { animation-delay: 0.6s; }
+.admin-delay-4 { animation-delay: 0.8s; }
+.admin-delay-5 { animation-delay: 1.0s; }
+
+.admin-row-animate {
+  animation: adminFadeUp 0.4s ease;
+}
+
+.admin-title-pop {
+  animation: adminPop 0.6s ease;
+}
+
+@keyframes adminFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes adminFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes adminPop {
+  0%   { transform: scale(0.8); opacity: 0; }
+  70%  { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .admin-container  { padding: 16px; margin: 0; }
+  .admin-tabs       { gap: 2px; }
+  .admin-tab-btn    { font-size: 0.78rem; padding: 7px 10px; }
+  .admin-form-row   { flex-direction: column; }
+  .admin-stats-row  { flex-direction: column; }
+  .admin-controls   { flex-direction: column; align-items: flex-start; }
+  .admin-search-input { width: 100%; }
+}

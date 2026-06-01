@@ -1,0 +1,74 @@
+/* ================================================
+   PINNACLE — SHARED ANIMATION UTILITIES
+   Imported once in App.jsx; available globally.
+   All keyframe names prefixed with "pinnacle-"
+   to avoid collision with third-party libraries.
+================================================ */
+
+/* -----------------------------------------------
+   KEYFRAMES
+----------------------------------------------- */
+
+/* Title / hero entrance — fade up from 28px */
+@keyframes pinnacle-fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card entrance — fade up from 30px */
+@keyframes pinnacle-cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Particle float — rises from bottom, pulsing opacity */
+@keyframes pinnacle-floatUp {
+  0%   { transform: translateY(0);       opacity: 0;   }
+  20%  {                                 opacity: 0.6; }
+  100% { transform: translateY(-110vh); opacity: 0;   }
+}
+
+/* -----------------------------------------------
+   SCROLL-REVEAL UTILITY
+   Usage:
+     1. Add class="scroll-reveal" to any element
+     2. Run initScrollReveal() once (see below)
+     3. Elements fade+lift when entering viewport
+
+   Stagger: add reveal-delay-[1–5] alongside
+            scroll-reveal for cascading groups.
+
+   GPU-safe: only transforms opacity + transform.
+   Triggers once: observer.unobserve() after fire.
+----------------------------------------------- */
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.65s ease-out, transform 0.65s ease-out;
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Transition-delay helpers for stagger groups */
+.reveal-delay-1 { transition-delay: 0.10s; }
+.reveal-delay-2 { transition-delay: 0.20s; }
+.reveal-delay-3 { transition-delay: 0.30s; }
+.reveal-delay-4 { transition-delay: 0.45s; }
+.reveal-delay-5 { transition-delay: 0.60s; }

@@ -1,0 +1,143 @@
+export const API = "https://pinnacle-backend-pq2c.onrender.com";
+
+const studentToken = () => localStorage.getItem("studentToken");
+const adminToken = () => localStorage.getItem("token");
+
+const handle = async (res) => {
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) return Promise.reject(data);
+  return data;
+};
+
+/* ─── Student Auth ─── */
+export const studentLogin = (email, password) =>
+  fetch(`${API}/api/auth/student/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  }).then(handle);
+
+export const forgotPassword = (email) =>
+  fetch(`${API}/api/auth/student/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email })
+  }).then(handle);
+
+export const resetPassword = (token, password) =>
+  fetch(`${API}/api/auth/student/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, password })
+  }).then(handle);
+
+/* ─── Invite ─── */
+export const verifyInviteToken = (token) =>
+  fetch(`${API}/api/invite/verify/${token}`).then(handle);
+
+export const acceptInvite = (token, password, name) =>
+  fetch(`${API}/api/invite/accept`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, password, name })
+  }).then(handle);
+
+export const sendInvite = (email) =>
+  fetch(`${API}/api/invite`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${adminToken()}`
+    },
+    body: JSON.stringify({ email })
+  }).then(handle);
+
+export const getInviteList = () =>
+  fetch(`${API}/api/invite/list`, {
+    headers: { Authorization: `Bearer ${adminToken()}` }
+  }).then(handle);
+
+/* ─── Admin — students ─── */
+export const getAdminStats = () =>
+  fetch(`${API}/api/admin/stats`, {
+    headers: { Authorization: `Bearer ${adminToken()}` }
+  }).then(handle);
+
+export const getStudents = () =>
+  fetch(`${API}/api/admin/students`, {
+    headers: { Authorization: `Bearer ${adminToken()}` }
+  }).then(handle);
+
+export const toggleStudent = (id) =>
+  fetch(`${API}/api/admin/students/${id}/toggle`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${adminToken()}` }
+  }).then(handle);
+
+export const deleteStudent = (id) =>
+  fetch(`${API}/api/admin/students/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${adminToken()}` }
+  }).then(handle);
+
+/* ─── Homework ─── */
+export const getHomework = (asAdmin = false) =>
+  fetch(`${API}/api/homework`, {
+    headers: { Authorization: `Bearer ${asAdmin ? adminToken() : studentToken()}` }
+  }).then(handle);
+
+export const createHomework = (formData) =>
+  fetch(`${API}/api/homework`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${adminToken()}` },
+    body: formData
+  }).then(handle);
+
+export const updateHomework = (id, formData) =>
+  fetch(`${API}/api/homework/${id}`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${adminToken()}` },
+    body: formData
+  }).then(handle);
+
+export const deleteHomework = (id) =>
+  fetch(`${API}/api/homework/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${adminToken()}` }
+  }).then(handle);
+
+export const deleteHomeworkFile = (hwId, fileName) =>
+  fetch(`${API}/api/homework/${hwId}/file/${encodeURIComponent(fileName)}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${adminToken()}` }
+  }).then(handle);
+
+export const downloadHomeworkFile = (fileName) =>
+  `${API}/api/homework/download/${encodeURIComponent(fileName)}`;
+
+/* ─── Blog ─── */
+export const getBlogs = () =>
+  fetch(`${API}/api/blog`).then(handle);
+
+export const getBlog = (slug) =>
+  fetch(`${API}/api/blog/${slug}`).then(handle);
+
+export const createBlog = (formData) =>
+  fetch(`${API}/api/blog`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${adminToken()}` },
+    body: formData
+  }).then(handle);
+
+export const updateBlog = (id, formData) =>
+  fetch(`${API}/api/blog/${id}`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${adminToken()}` },
+    body: formData
+  }).then(handle);
+
+export const deleteBlog = (id) =>
+  fetch(`${API}/api/blog/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${adminToken()}` }
+  }).then(handle);

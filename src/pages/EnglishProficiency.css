@@ -1,0 +1,275 @@
+/* ===============================
+   🌐 MAIN CONTAINER (SCOPED)
+================================ */
+.ep-container {
+  position: relative;
+  min-height: 100vh;
+  padding: 80px 40px;
+  background: #ffffff;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* horizontal center */
+  justify-content: flex-start;
+}
+
+/* ===============================
+   ✨ BACKGROUND GLOW (SCOPED)
+================================ */
+.ep-container::before {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(106, 13, 173, 0.15), transparent);
+  top: -120px;
+  left: -120px;
+  filter: blur(100px);
+  z-index: 0;
+}
+
+.ep-container::after {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(199, 125, 255, 0.15), transparent);
+  bottom: -120px;
+  right: -120px;
+  filter: blur(100px);
+  z-index: 0;
+}
+
+/* ===============================
+   🔥 TITLE (PERFECT CENTER FIX)
+================================ */
+.ep-title {
+  font-size: 3rem;
+  color: #6a0dad;
+  margin-bottom: 60px;
+
+  text-align: center;
+  width: 100%;
+  max-width: 1000px;
+
+  position: relative;
+  z-index: 2;
+
+  opacity: 0;
+  transform: translateY(28px);
+  animation: pinnacle-fadeUp 0.7s ease-out 0.1s forwards;
+}
+
+/* ===============================
+   🧩 GRID (CENTERED PROPERLY)
+================================ */
+.ep-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 35px;
+
+  width: 100%;
+  max-width: 1100px;
+
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+  z-index: 2;
+}
+
+/* ===============================
+   📱 RESPONSIVE (IMPORTANT)
+================================ */
+/* 900px — tablet */
+@media (max-width: 900px) {
+  .ep-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ep-title {
+    font-size: 2.2rem;
+  }
+}
+
+/* 768px */
+@media (max-width: 768px) {
+  .ep-container {
+    padding: 60px 20px;
+  }
+}
+
+/* 425px — mobile L */
+@media (max-width: 425px) {
+  .ep-container {
+    padding: 40px 16px;
+  }
+
+  .ep-title {
+    font-size: 1.8rem;
+    margin-bottom: 40px;
+  }
+
+  .ep-card {
+    padding: 25px 20px;
+  }
+
+  .ep-card h2 {
+    font-size: 1.4rem;
+  }
+}
+
+/* 375px — mobile M */
+@media (max-width: 375px) {
+  .ep-title {
+    font-size: 1.6rem;
+  }
+}
+
+/* 320px — mobile S */
+@media (max-width: 320px) {
+  .ep-title {
+    font-size: 1.4rem;
+  }
+
+  .ep-card h2 {
+    font-size: 1.2rem;
+  }
+}
+
+/* ===============================
+   🧊 CARD (GLASS + STABLE)
+================================ */
+.ep-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  padding: 35px;
+  cursor: pointer;
+
+  border: 1px solid rgba(106, 13, 173, 0.1);
+
+  /* Only transition non-transform props — avoids conflict with JS 3D tilt */
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+
+  transform-style: preserve-3d;
+  will-change: transform;
+
+  opacity: 0;
+  animation: pinnacle-cardIn 0.7s ease-out forwards;
+}
+
+/* ===============================
+   📝 TEXT
+================================ */
+.ep-card h2 {
+  font-size: 1.6rem;
+  color: #6a0dad;
+  transition: color 0.25s ease;
+}
+
+.ep-card p {
+  margin-top: 10px;
+  color: #6a0dad;
+  opacity: 0.8;
+  transition: color 0.25s ease;
+}
+
+/* ===============================
+   🔥 HOVER (PURPLE SWITCH)
+================================ */
+.ep-card:hover {
+  background: #6a0dad;
+  box-shadow: 0 15px 40px rgba(106, 13, 173, 0.25);
+}
+
+/* Text turns white */
+.ep-card:hover h2,
+.ep-card:hover p {
+  color: #ffffff;
+}
+
+/* ===============================
+   ✨ SHINE EFFECT (NO FLICKER)
+================================ */
+.ep-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.ep-card:hover::after {
+  opacity: 1;
+}
+
+/* ===============================
+   ✨ PARTICLES
+================================ */
+.ep-particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ep-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(106, 13, 173, 0.4);
+  border-radius: 50%;
+  bottom: -20px;
+  animation: pinnacle-floatUp linear infinite;
+  transition: transform 0.2s ease;
+}
+
+/* random positions */
+.ep-particle:nth-child(1) { left: 10%; animation-duration: 12s; }
+.ep-particle:nth-child(2) { left: 20%; animation-duration: 18s; }
+.ep-particle:nth-child(3) { left: 30%; animation-duration: 14s; }
+.ep-particle:nth-child(4) { left: 40%; animation-duration: 20s; }
+.ep-particle:nth-child(5) { left: 50%; animation-duration: 16s; }
+.ep-particle:nth-child(6) { left: 60%; animation-duration: 22s; }
+.ep-particle:nth-child(7) { left: 70%; animation-duration: 13s; }
+.ep-particle:nth-child(8) { left: 80%; animation-duration: 19s; }
+.ep-particle:nth-child(9) { left: 90%; animation-duration: 15s; }
+.ep-particle:nth-child(10) { left: 15%; animation-duration: 17s; }
+.ep-particle:nth-child(11) { left: 25%; animation-duration: 21s; }
+.ep-particle:nth-child(12) { left: 35%; animation-duration: 13s; }
+.ep-particle:nth-child(13) { left: 45%; animation-duration: 18s; }
+.ep-particle:nth-child(14) { left: 55%; animation-duration: 16s; }
+.ep-particle:nth-child(15) { left: 65%; animation-duration: 20s; }
+.ep-particle:nth-child(16) { left: 75%; animation-duration: 14s; }
+.ep-particle:nth-child(17) { left: 85%; animation-duration: 19s; }
+.ep-particle:nth-child(18) { left: 95%; animation-duration: 22s; }
+.ep-particle:nth-child(19) { left: 5%;  animation-duration: 15s; }
+.ep-particle:nth-child(20) { left: 50%; animation-duration: 17s; }
+
+/* Particle keyframe lives in src/styles/animations.css (pinnacle-floatUp) */
+
+/* ===============================
+   🖱️ MOUSE GLOW
+================================ */
+.ep-mouse-glow {
+  position: fixed;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(106, 13, 173, 0.2), transparent);
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 999;
+}
