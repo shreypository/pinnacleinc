@@ -556,8 +556,6 @@ function BlogTab() {
   if (loading) return <Spinner />;
 
   if (view === "form") {
-    const msgType = msg.startsWith("ok:") ? "success" : "error";
-    const msgText = msg.slice(3);
     return (
       <div className="admin-fade-in">
         <div className="admin-card" style={{ padding: 24 }}>
@@ -673,9 +671,6 @@ function BlogTab() {
       </div>
     );
   }
-
-  const msgType = msg.startsWith("ok:") ? "success" : "error";
-  const msgText = msg.slice(3);
 
   return (
     <div className="admin-fade-in">
