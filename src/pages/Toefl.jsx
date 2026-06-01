@@ -7,7 +7,9 @@ const config = {
   org:      "ETS (Educational Testing Service)",
   website:  "https://www.ets.org/toefl",
   tagline:  "Leading internet-based English proficiency test for academic success",
-  abbr:     "TOEFL"
+  abbr:     "TOEFL",
+  brand:    ["#005eb8", "#0091b3"],   // ETS blue
+  logoUrl:  null
 };
 
 export default function Toefl() {

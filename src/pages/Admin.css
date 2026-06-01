@@ -544,6 +544,194 @@ select.admin-form-input {
   100% { transform: scale(1); opacity: 1; }
 }
 
+/* ════════════════════════════════════════════
+   INVITE UX — step loader, success, fail cards
+════════════════════════════════════════════ */
+
+/* Step loader */
+.invite-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 32px 24px;
+}
+
+.invite-loader-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(108, 92, 231, 0.15);
+  border-top-color: #6c5ce7;
+  border-radius: 50%;
+  animation: adminSpinInvite 0.75s linear infinite;
+}
+
+@keyframes adminSpinInvite { to { transform: rotate(360deg); } }
+
+.invite-loader-step {
+  font-size: 0.88rem;
+  color: #6c5ce7;
+  font-weight: 500;
+  animation: adminFadeIn 0.35s ease;
+  text-align: center;
+}
+
+.invite-loader-sub {
+  font-size: 0.78rem;
+  color: #aaa;
+  text-align: center;
+}
+
+/* Success card */
+.invite-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 24px;
+  text-align: center;
+  animation: adminFadeIn 0.4s ease;
+}
+
+.invite-success-icon {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: white;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+  animation: adminSuccessPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes adminSuccessPop {
+  0%   { transform: scale(0.4); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+.invite-success-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #065f46;
+}
+
+.invite-success-email {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.invite-success-sub {
+  font-size: 0.82rem;
+  color: #aaa;
+}
+
+.invite-success-dismiss {
+  width: 100%;
+  background: rgba(16, 185, 129, 0.08);
+  border: none;
+  padding: 4px 0 0;
+  height: 3px;
+  position: relative;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.invite-success-dismiss::after {
+  content: "";
+  position: absolute;
+  left: 0; top: 0;
+  height: 100%;
+  background: #10b981;
+  border-radius: 2px;
+  animation: adminDismissBar 5s linear forwards;
+}
+
+@keyframes adminDismissBar {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+/* Email-failed card */
+.invite-partial {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 24px;
+  animation: adminFadeIn 0.4s ease;
+}
+
+.invite-partial-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.invite-partial-icon {
+  font-size: 1.3rem;
+}
+
+.invite-partial-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #92400e;
+}
+
+.invite-partial-body {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+.invite-copy-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.invite-copy-link {
+  font-size: 0.78rem;
+  color: #6c5ce7;
+  word-break: break-all;
+  flex: 1;
+  background: #f5f3ff;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.invite-copy-btn {
+  padding: 7px 14px;
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.invite-copy-btn:hover { background: #5a4bd1; }
+.invite-copy-btn.copied { background: #10b981; }
+
+/* Email status badge in invite history */
+.email-status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.email-status-badge.delivered { background: rgba(16,185,129,0.12); color: #059669; }
+.email-status-badge.failed    { background: rgba(239,68,68,0.1);   color: #dc2626; }
+.email-status-badge.pending   { background: rgba(251,191,36,0.12); color: #d97706; }
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .admin-container  { padding: 16px; margin: 0; }

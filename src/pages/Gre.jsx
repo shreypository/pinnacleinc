@@ -7,7 +7,9 @@ const config = {
   org:      "ETS (Educational Testing Service)",
   website:  "https://www.ets.org/gre",
   tagline:  "Required for admission to most graduate programs worldwide",
-  abbr:     "GRE"
+  abbr:     "GRE",
+  brand:    ["#005eb8", "#0091b3"],   // ETS blue
+  logoUrl:  null                       // drop official logo into /public and set path
 };
 
 export default function Gre() {

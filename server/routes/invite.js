@@ -57,20 +57,20 @@ router.post("/", verifyToken, isAdmin, inviteLimiter, async (req, res) => {
     } catch (e) {
       emailError = e.message;
       console.error(`[INVITE] Email delivery failed for ${emailLower}:`, e.message);
-      if (e.message.includes("SMTP verification failed") || e.message.includes("Invalid login") || e.message.includes("Username and Password")) {
-        console.error("[INVITE] → Gmail App Password may be incorrect or 2FA not enabled.");
-        console.error("[INVITE] → See server/utils/email.js for setup instructions.");
-      }
     }
 
-    console.log(`📨 Invite token created for ${emailLower} by ${req.user.username} | email sent: ${emailSent}`);
+    // Persist email delivery status so admin history reflects reality
+    invite.emailSent  = emailSent;
+    invite.emailError = emailSent ? null : (emailError || "Unknown error");
+    await invite.save();
+
+    console.log(`📨 Invite created for ${emailLower} by ${req.user.username} | emailSent: ${emailSent}`);
 
     res.json({
-      message: emailSent
-        ? "Invitation sent successfully"
-        : `Invite created but email delivery failed: ${emailError}. Use the manual link below.`,
+      message: emailSent ? "Invitation sent successfully" : "Invitation created — email delivery failed",
       emailSent,
-      inviteLink // Always returned so admin can share manually if email fails
+      emailError: emailSent ? null : emailError,
+      inviteLink
     });
   } catch (err) {
     console.error("Send invite:", err.message);

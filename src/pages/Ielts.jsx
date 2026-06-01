@@ -7,7 +7,9 @@ const config = {
   org:      "British Council / IDP / Cambridge",
   website:  "https://www.ielts.org",
   tagline:  "World's most popular English language proficiency test",
-  abbr:     "IELTS"
+  abbr:     "IELTS",
+  brand:    ["#e31837", "#b01228"],   // IELTS red
+  logoUrl:  null
 };
 
 export default function Ielts() {

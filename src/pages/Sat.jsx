@@ -7,7 +7,9 @@ const config = {
   org:      "College Board",
   website:  "https://satsuite.collegeboard.org",
   tagline:  "Standardized test for college admissions in the United States",
-  abbr:     "SAT"
+  abbr:     "SAT",
+  brand:    ["#0077c8", "#005a92"],   // College Board blue
+  logoUrl:  null
 };
 
 export default function Sat() {

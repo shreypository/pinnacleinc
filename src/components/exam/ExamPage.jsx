@@ -14,7 +14,13 @@ import "./ExamPage.css";
     org:      "ETS",                      // conducting organization
     website:  "https://www.ets.org/gre",  // official site
     tagline:  "Graduate admissions test", // one-liner
-    abbr:     "GRE"                       // logo abbreviation (2-3 chars)
+    abbr:     "GRE",                      // logo abbreviation (2-3 chars)
+    brand:    ["#6a0dad", "#7c3aed"],     // [from, to] official brand gradient
+    logoUrl:  null                        // optional: path/URL to official logo
+                                          // (SVG/PNG). When set, renders a real
+                                          // <img>; otherwise a branded mark shows.
+                                          // Drop a file in /public and set the path
+                                          // here — no component changes needed.
   }
 */
 export default function ExamPage({ config }) {
@@ -78,10 +84,30 @@ export default function ExamPage({ config }) {
       {/* ── HERO: Official Exam Info ── */}
       <section className="exam-hero">
         <div className="exam-info-card scroll-reveal">
-          {/* Logo mark */}
-          <div className="exam-logo-mark" aria-label={`${config.name} logo`}>
-            {config.abbr || config.name.slice(0, 3)}
-          </div>
+          {/* Logo: real image if provided, else branded fallback mark */}
+          {config.logoUrl ? (
+            <div className="exam-logo-img-wrap">
+              <img
+                src={config.logoUrl}
+                alt={`${config.name} official logo`}
+                className="exam-logo-img"
+                loading="eager"
+              />
+            </div>
+          ) : (
+            <div
+              className="exam-logo-mark"
+              aria-label={`${config.name} logo`}
+              style={
+                config.brand
+                  ? { background: `linear-gradient(135deg, ${config.brand[0]}, ${config.brand[1]})`,
+                      boxShadow: `0 12px 32px ${config.brand[0]}4d` }
+                  : undefined
+              }
+            >
+              {config.abbr || config.name.slice(0, 3)}
+            </div>
+          )}
 
           <div className="exam-info-text">
             <h1 className="exam-name">{config.name}</h1>
@@ -99,6 +125,12 @@ export default function ExamPage({ config }) {
             target="_blank"
             rel="noopener noreferrer"
             className="exam-official-btn"
+            style={
+              config.brand
+                ? { background: `linear-gradient(135deg, ${config.brand[0]}, ${config.brand[1]})`,
+                    boxShadow: `0 8px 24px ${config.brand[0]}40` }
+                : undefined
+            }
           >
             Visit Official Website
             <span className="exam-btn-arrow" aria-hidden="true">→</span>

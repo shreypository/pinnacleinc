@@ -7,7 +7,9 @@ const config = {
   org:      "GMAC (Graduate Management Admission Council)",
   website:  "https://www.mba.com",
   tagline:  "The premier exam for admission to business schools globally",
-  abbr:     "GMAT"
+  abbr:     "GMAT",
+  brand:    ["#1a3c6e", "#2e5c9e"],   // GMAC navy
+  logoUrl:  null
 };
 
 export default function Gmat() {

@@ -7,7 +7,9 @@ const config = {
   org:      "Pearson",
   website:  "https://www.pearsonpte.com",
   tagline:  "AI-scored English proficiency test accepted worldwide",
-  abbr:     "PTE"
+  abbr:     "PTE",
+  brand:    ["#6c2eb7", "#9b4dca"],   // Pearson amethyst
+  logoUrl:  null
 };
 
 export default function Pte() {

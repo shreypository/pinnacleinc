@@ -201,6 +201,67 @@ box-shadow:  0 15px 40px rgba(106, 13, 173, 0.25)
 
 ## Completed Tasks
 
+### 2026-06-01 — Invite UX Overhaul, Inline Blog Reader, Email IPv4 Fix, Exam Logo Theming
+
+**Files Created:** _(none — all changes modify existing files; BlogModal removed)_
+
+**Files Removed:**
+- `src/components/exam/BlogModal.jsx` and `BlogModal.css` — modal pattern eliminated; blog content is now inline (see Blog Auto-Scroll below).
+
+**Files Modified:**
+- `server/models/Invite.js` — added `emailSent` (Boolean) and `emailError` (String) fields for delivery tracking.
+- `server/routes/invite.js` — persists `emailSent`/`emailError` on the invite doc after send attempt; returns `emailSent` + `emailError` in the API response.
+- `server/utils/email.js` — **IPv4 fix** + structured diagnostic logging.
+- `src/pages/Admin.jsx` (`InvitesTab`) — full UX redesign: step loader, success card with auto-dismiss, email-failed card with copy-link, Email Status column.
+- `src/pages/Admin.css` — invite loader/success/partial card styles + `.email-status-badge` styles.
+- `src/components/exam/BlogCarousel.jsx` + `.css` — rewritten as inline auto-scroll reader (no modal, no "Read More").
+- `src/components/exam/ExamPage.jsx` + `.css` — logo supports real `logoUrl` image with branded fallback mark; official-website button themed per brand.
+- All 7 exam configs (`Gre/Toefl/Gmat/Sat/Pte/Act/Ielts.jsx`) — added `brand` gradient + `logoUrl` placeholder.
+
+#### Invite UX Improvements (Admin → Invites tab)
+- **Loading state:** Disables the form and shows a spinner that steps through "Creating secure invite… → Generating one-time token… → Contacting email provider… → Sending invitation email…" (advances every 0.9 s).
+- **Success state:** Green check card "Invitation Sent Successfully" with the recipient email and a 5-second auto-dismiss progress bar. "Send another" resets.
+- **Email-failed state:** Amber card "Invitation Created — Email Not Delivered" with the secure link in a copy box and a **Copy Link** button (turns green "✓ Copied"). The invite still works — only delivery failed.
+- **Hard-error state:** Red message + "Try again". 401/403 adds a hint to re-login (stale admin token).
+
+#### Email Delivery Tracking
+- Invite documents now store `emailSent` (true/false) and `emailError` (string or null), set at creation time.
+- The invite history table now has two distinct columns:
+  - **Invite** status: Pending / Used / Expired (lifecycle of the token).
+  - **Email** status: Delivered / Failed / — (actual SMTP delivery result).
+- This resolves the prior confusion where an invite showed "Pending" even when the email never went out.
+
+#### Blog Auto-Scroll Reader (replaces modal)
+- `BlogCarousel` now fetches **full content** (`/api/blog/id/:id`) for the active blog and renders it **inline** — no "Read More", no modal, no separate page.
+- **Auto-scroll:** A `requestAnimationFrame` loop scrolls the content region at ~38 px/s (comfortable reading speed). Time-delta based, so speed is frame-rate independent — no jumps or flicker.
+- **Hover pauses** both the auto-scroll AND the carousel rotation; leaving resumes both (`hovered` ref checked inside the RAF tick and the rotation interval).
+- Scroll resets to top and restarts when a new blog becomes active. A bottom fade gradient (`.bc-scroll-fade`) hides the text cut-off.
+- **Carousel:** Rotates every 9 s between blogs (fade+slide). Dot indicators + prev/next arrows + touch swipe. Single blog = no controls.
+- Content is rendered as **plain-text paragraphs** (split on blank lines, `\n` → `<br/>`) — never `innerHTML`, so no XSS surface. Same safe renderer used for both TEXT and PDF blogs.
+- **Empty state:** "Blog Insights Coming Soon" premium card with topic list.
+
+#### Official Exam Logo Theming
+- `ExamPage` logo block now: renders `<img>` from `config.logoUrl` if set (white tile, `object-fit: contain`), else a **branded fallback mark** using the org's official brand gradient.
+- Each exam carries a `brand: [from, to]` official color pair, also applied to the "Visit Official Website" button:
+  - GRE / TOEFL → ETS blue `#005eb8→#0091b3`
+  - GMAT → GMAC navy `#1a3c6e→#2e5c9e`
+  - SAT → College Board blue `#0077c8→#005a92`
+  - PTE → Pearson amethyst `#6c2eb7→#9b4dca`
+  - ACT → ACT red `#d81e2c→#a01722`
+  - IELTS → IELTS red `#e31837→#b01228`
+- **To add real official logos later:** drop the SVG/PNG into `/public` (e.g. `/public/logos/gre.svg`) and set `logoUrl: "/logos/gre.svg"` in that exam's config. Zero component changes needed. Official logo files are NOT bundled to avoid trademark/redistribution issues.
+
+#### Email Diagnostics — Root Cause of `connect ENETUNREACH 2607:f8b0:...:465`
+- **Root cause:** `smtp.gmail.com` resolves to an **IPv6** address on Render, but Render's outbound network does **not support IPv6** → the socket connection is unreachable. This is a network-layer failure, NOT an auth/credential failure.
+- **Fix:** Added `family: 4` to the nodemailer transport, forcing the underlying socket to resolve/connect over **IPv4 only**. (`host: smtp.gmail.com`, `port: 465`, `secure: true` were already correct.)
+- **Diagnostics added:** `transporter.verify()` now logs `err.code`/`err.errno` and branches on the failure type:
+  - `ENETUNREACH` → network/IPv6 guidance.
+  - `EAUTH` / "password" → Gmail App Password guidance.
+- **Credentials note:** `EMAIL_PASS` must be a 16-char Gmail **App Password** (2FA required), not the account password. Independent of the IPv4 fix.
+- Invites **never silently fail**: if delivery fails, the invite is still created, `emailSent=false` + `emailError` are persisted, and the admin gets the copy-link fallback card.
+
+---
+
 ### 2026-06-01 — EnglishProficiency Animation Polish + Shared Animation System
 
 **Files Created:**

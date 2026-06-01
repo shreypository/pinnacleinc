@@ -719,80 +719,199 @@ function BlogTab() {
 /* ══════════════════════════════════════════════
    INVITES TAB
 ══════════════════════════════════════════════ */
+
+const INVITE_STEPS = [
+  "Creating secure invite…",
+  "Generating one-time token…",
+  "Contacting email provider…",
+  "Sending invitation email…"
+];
+
 function InvitesTab() {
-  const [email, setEmail] = useState("");
+  const [email,   setEmail]   = useState("");
   const [sending, setSending] = useState(false);
-  const [result, setResult] = useState(null);
+  const [step,    setStep]    = useState(0);
+  // result shapes: null | { type:"success", sentEmail } | { type:"partial", link } | { type:"error", msg }
+  const [result,  setResult]  = useState(null);
+  const [copied,  setCopied]  = useState(false);
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(true);
+  const stepTimerRef = useRef(null);
 
   const load = () =>
     getInviteList().then(setInvites).catch(() => {}).finally(() => setLoading(false));
 
   useEffect(() => { load(); }, []);
 
+  // Auto-dismiss success after 5 s
+  useEffect(() => {
+    if (result?.type === "success") {
+      const t = setTimeout(() => setResult(null), 5200);
+      return () => clearTimeout(t);
+    }
+  }, [result]);
+
+  const startStepAnimation = () => {
+    let i = 0;
+    setStep(0);
+    stepTimerRef.current = setInterval(() => {
+      i = Math.min(i + 1, INVITE_STEPS.length - 1);
+      setStep(i);
+    }, 900);
+  };
+
+  const stopStepAnimation = () => {
+    if (stepTimerRef.current) clearInterval(stepTimerRef.current);
+  };
+
   const handleInvite = async () => {
     if (!email.trim()) return;
-    setSending(true); setResult(null);
+    setSending(true);
+    setResult(null);
+    startStepAnimation();
+
     try {
       const data = await sendInvite(email.trim());
-      setResult({ ok: true, msg: data.message, link: data.inviteLink });
+      const sentEmail = email.trim();
       setEmail("");
       load();
+
+      if (data.emailSent) {
+        setResult({ type: "success", sentEmail });
+      } else {
+        setResult({ type: "partial", link: data.inviteLink, sentEmail });
+      }
     } catch (e) {
-      const msg = e?.message || "Failed to send invite.";
-      // 401/403 most likely means an old JWT token without role:"admin"
-      const hint = (msg.includes("Admin") || msg.includes("token") || msg.includes("401") || msg.includes("403"))
-        ? " (Hint: log out and log back in to refresh your admin token, then try again.)"
+      const msg = e?.message || "Failed to send invitation.";
+      const hint = /Admin|token|401|403/i.test(msg)
+        ? " Try logging out and back in to refresh your admin session."
         : "";
-      setResult({ ok: false, msg: msg + hint });
+      setResult({ type: "error", msg: msg + hint });
     } finally {
+      stopStepAnimation();
       setSending(false);
     }
   };
 
-  const inviteStatus = (inv) => {
+  const copyLink = (link) => {
+    navigator.clipboard.writeText(link).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const inviteStatusClass = (inv) => {
     if (inv.isUsed) return "is-used";
     if (new Date(inv.expiresAt) < new Date()) return "is-expired";
     return "is-pending";
   };
 
-  const inviteLabel = (inv) => {
+  const inviteStatusLabel = (inv) => {
     if (inv.isUsed) return "Used";
     if (new Date(inv.expiresAt) < new Date()) return "Expired";
     return "Pending";
   };
 
+  const emailStatusClass  = (inv) => inv.emailSent === true ? "delivered" : inv.emailSent === false ? "failed" : "pending";
+  const emailStatusLabel  = (inv) => inv.emailSent === true ? "Delivered" : inv.emailSent === false ? "Failed" : "—";
+
+  /* ─ Render ─ */
   return (
     <div className="admin-fade-in">
-      {/* Send invite form */}
-      <div className="admin-card" style={{ marginBottom: 24, padding: 24 }}>
-        <h3 style={{ color: "#2d1457", marginBottom: 14, fontSize: "1rem" }}>
-          Invite a Student
-        </h3>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <input
-            className="admin-search-input"
-            style={{ flex: 1, minWidth: 240 }}
-            type="email"
-            placeholder="student@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleInvite()}
-          />
-          <button className="admin-primary-btn" onClick={handleInvite} disabled={sending}>
-            {sending ? "Sending…" : "Send Invitation"}
-          </button>
+      {/* Send invite card */}
+      <div className="admin-card" style={{ marginBottom: 24, overflow: "hidden" }}>
+        <div style={{ padding: "20px 24px 0" }}>
+          <h3 style={{ color: "#2d1457", marginBottom: 14, fontSize: "1rem" }}>Invite a Student</h3>
         </div>
-        {result && (
-          <div className={`admin-form-msg ${result.ok ? "success" : "error"}`} style={{ marginTop: 12 }}>
-            {result.msg}
-            {result.ok && result.link && (
-              <div style={{ marginTop: 8, wordBreak: "break-all", fontSize: "0.8rem" }}>
-                <strong>Manual link:</strong>{" "}
-                <a href={result.link} target="_blank" rel="noreferrer">{result.link}</a>
+
+        {/* ── Idle: email input ── */}
+        {!sending && !result && (
+          <div style={{ padding: "0 24px 20px", display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <input
+              className="admin-search-input"
+              style={{ flex: 1, minWidth: 240 }}
+              type="email"
+              placeholder="student@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleInvite()}
+            />
+            <button className="admin-primary-btn" onClick={handleInvite}>
+              Send Invitation
+            </button>
+          </div>
+        )}
+
+        {/* ── Sending: step animation ── */}
+        {sending && (
+          <div className="invite-loader">
+            <div className="invite-loader-spinner" />
+            <p className="invite-loader-step">{INVITE_STEPS[step]}</p>
+            <p className="invite-loader-sub">Please wait — do not close this window</p>
+          </div>
+        )}
+
+        {/* ── Success ── */}
+        {!sending && result?.type === "success" && (
+          <div className="invite-success">
+            <div className="invite-success-icon">✓</div>
+            <p className="invite-success-title">Invitation Sent Successfully</p>
+            <p className="invite-success-email">
+              Invitation delivered to <strong>{result.sentEmail}</strong>
+            </p>
+            <p className="invite-success-sub">
+              The student can now create their account using the invitation link.
+            </p>
+            <div className="invite-success-dismiss" />
+            <button
+              className="admin-toggle-btn"
+              style={{ marginTop: 8 }}
+              onClick={() => setResult(null)}
+            >
+              Send another
+            </button>
+          </div>
+        )}
+
+        {/* ── Email failed but invite created ── */}
+        {!sending && result?.type === "partial" && (
+          <div style={{ padding: "0 24px 20px", background: "rgba(251,191,36,0.06)", borderTop: "1px solid rgba(251,191,36,0.2)" }}>
+            <div className="invite-partial">
+              <div className="invite-partial-header">
+                <span className="invite-partial-icon">⚠️</span>
+                <span className="invite-partial-title">Invitation Created — Email Not Delivered</span>
               </div>
-            )}
+              <p className="invite-partial-body">
+                The secure invitation link was created successfully, but the email provider
+                could not deliver the message. Share the link below directly with the student.
+              </p>
+              <div className="invite-copy-row">
+                <span className="invite-copy-link">{result.link}</span>
+                <button
+                  className={`invite-copy-btn ${copied ? "copied" : ""}`}
+                  onClick={() => copyLink(result.link)}
+                >
+                  {copied ? "✓ Copied" : "Copy Link"}
+                </button>
+              </div>
+              <button
+                className="admin-toggle-btn"
+                style={{ alignSelf: "flex-start", marginTop: 4 }}
+                onClick={() => setResult(null)}
+              >
+                Send another
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Hard error ── */}
+        {!sending && result?.type === "error" && (
+          <div style={{ padding: "0 24px 20px" }}>
+            <div className="admin-form-msg error" style={{ marginBottom: 12 }}>
+              {result.msg}
+            </div>
+            <button className="admin-toggle-btn" onClick={() => setResult(null)}>Try again</button>
           </div>
         )}
       </div>
@@ -807,7 +926,13 @@ function InvitesTab() {
         ) : (
           <table>
             <thead>
-              <tr><th>Email</th><th>Sent By</th><th>Sent</th><th>Expires</th><th>Status</th></tr>
+              <tr>
+                <th>Email</th>
+                <th>Sent By</th>
+                <th>Date</th>
+                <th>Invite</th>
+                <th>Email</th>
+              </tr>
             </thead>
             <tbody>
               {invites.map((inv) => (
@@ -815,10 +940,14 @@ function InvitesTab() {
                   <td>{inv.email}</td>
                   <td>{inv.createdBy}</td>
                   <td>{new Date(inv.createdAt).toLocaleDateString()}</td>
-                  <td>{new Date(inv.expiresAt).toLocaleDateString()}</td>
                   <td>
-                    <span className={`admin-status-badge ${inviteStatus(inv)}`}>
-                      {inviteLabel(inv)}
+                    <span className={`admin-status-badge ${inviteStatusClass(inv)}`}>
+                      {inviteStatusLabel(inv)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`email-status-badge ${emailStatusClass(inv)}`}>
+                      {emailStatusLabel(inv)}
                     </span>
                   </td>
                 </tr>

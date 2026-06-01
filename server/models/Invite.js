@@ -27,8 +27,17 @@ const InviteSchema = new mongoose.Schema(
       default: null
     },
     createdBy: {
-      type: String, // admin username
+      type: String,
       required: true
+    },
+    // Email delivery tracking
+    emailSent: {
+      type: Boolean,
+      default: false
+    },
+    emailError: {
+      type: String,
+      default: null
     }
   },
   { timestamps: true }
