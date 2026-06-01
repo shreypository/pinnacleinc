@@ -35,6 +35,8 @@ module.exports = {
   // Email (Gmail App Password)
   EMAIL_USER: emailUser,
   EMAIL_PASS: emailPass,
+  EMAIL_HOST: process.env.EMAIL_HOST || "smtp.gmail.com",
+  EMAIL_PORT: process.env.EMAIL_PORT || "465",
 
   // Frontend URL for invite/reset links
   FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",

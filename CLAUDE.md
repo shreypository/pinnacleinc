@@ -201,6 +201,60 @@ box-shadow:  0 15px 40px rgba(106, 13, 173, 0.25)
 
 ## Completed Tasks
 
+### 2026-06-01 — Manual+Auto Blog Scroll, Email Hardening + Diagnostics, Required Registration Fields
+
+**Files Modified:**
+- `server/utils/email.js` — connection timeouts, 465→587 STARTTLS fallback, `verifyTransport()`, `sendTestEmail()`, `annotate()` (error hints), structured logging.
+- `server/env.js` — added `EMAIL_HOST`, `EMAIL_PORT` (override-able SMTP config).
+- `server/routes/adminManage.js` — `POST /api/admin/test-email` (admin, rate-limited, sends only to EMAIL_USER) + `GET /api/admin/email-health`; toggle uses `validateModifiedOnly`.
+- `server/routes/invite.js` — `/accept` now requires & validates name (≥2) + phone (10–15 digits); persists `emailSentAt`; ValidationError → 400.
+- `server/routes/studentAuth.js` — forgot/reset diagnostic logging; existing-user saves use `validateModifiedOnly`.
+- `server/models/User.js` — `name` required (min 2), new `phone` required (regex `^\d{10,15}$`).
+- `server/models/Invite.js` — added `emailSentAt`.
+- `src/services/api.js` — `acceptInvite(token,pw,name,phone)`, `sendTestEmail()`, `checkEmailHealth()` (return structured body, never throw).
+- `src/pages/AcceptInvite.jsx` — required Full Name + Phone fields with validation.
+- `src/pages/Admin.jsx` — new **Diagnostics** tab (Send Test Email / Verify Connection + fix guide); invite history adds **Delivered At** column.
+- `src/components/exam/BlogCarousel.jsx` + `.css` — manual scroll + auto-scroll coexistence.
+
+#### Blog Scroll Behavior (BlogCarousel)
+- **Auto-scroll** runs via a single `requestAnimationFrame` loop per article (38 px/s, time-delta based — frame-rate independent).
+- **Manual scroll enabled:** `.bc-scroll-wrap` is now `overflow-y: auto` with a styled slim purple scrollbar (WebKit + Firefox). Mouse wheel + touch both work.
+- **Hover** pauses auto-scroll (independent gate `hovered`).
+- **Manual interaction** (`onWheel`/`onTouchMove`) sets a `userReading` flag that pauses auto-scroll; it **resumes 10 s** after the last interaction (`RESUME_AFTER_MS`), continuing from the current position (no jump — `lastTime` is reset).
+- **End of article:** when the bottom is reached, auto-scroll stops, waits **3 s** (`END_PAUSE_MS`), then advances to the next article starting from the top. Short non-scrolling articles dwell **9 s** (`SHORT_DWELL_MS`). Scrolling back up cancels the pending advance. Single blog never advances (no endless loop).
+- The fixed 9 s rotation interval was **removed** — rotation is now driven by read-through.
+
+#### Email System — Root Cause & Hardening
+- **Original root cause** (still in effect): `smtp.gmail.com` resolved to IPv6 on Render → `ENETUNREACH`. Fixed earlier with `family: 4` (IPv4). Retained.
+- **Most likely remaining cause of "email fails" in production:** `EMAIL_PASS` is not a valid Gmail **App Password** (requires 2FA), OR the configured value/2FA is missing in the Render dashboard. This is an environment/credential issue, not a code issue.
+- **New resilience:** explicit `connectionTimeout`/`greetingTimeout`/`socketTimeout` (fail fast, clear error); automatic **fallback to STARTTLS:587** when 465 hits a connection-level error (`ETIMEDOUT`/`ECONNECTION`/`ESOCKET`/`ENETUNREACH`/`ECONNREFUSED`).
+- **Diagnostics:** Admin → **Diagnostics** tab → *Send Test Email* (sends to the configured sender only) and *Verify Connection*. Both show exact `error` + `code` + actionable `hint`. Backed by `POST /api/admin/test-email` and `GET /api/admin/email-health`.
+
+#### Forgot Password — Audit Result
+- The full chain is **correct and functional**: forgot-password generates a SHA-256-hashed token (1 h expiry), stores it, emails the raw token link; reset-password verifies the hash, re-hashes the new password (bcrypt 12), clears the token. The only failure mode was **email delivery** (same SMTP root cause). Added structured logs: token generated → send attempted → success/failure → token verified → password changed. **Passwords are never logged.**
+
+#### Registration Validation
+- **Frontend** (`AcceptInvite.jsx`): Full Name (≥2 chars) and Phone (10–15 digits, non-digits stripped) are now required, validated before submit.
+- **Backend route** (`/api/invite/accept`): same checks, returns 400 with a specific message.
+- **Schema** (`User`): `name` required (min 2), `phone` required (regex). Triple-layer enforcement.
+- **Legacy-safe:** existing accounts predating `phone` won't break — all existing-user `save()` calls use `{ validateModifiedOnly: true }`, so full validation runs only on new account creation.
+
+#### Security Audit (post-change)
+- **Test-email endpoint:** admin-only (`verifyToken+isAdmin`), rate-limited (10/10 min), hard-locked to send to `EMAIL_USER` only → **cannot be used as an open relay/spam tool**.
+- **email-health:** admin-only; returns host/port/user (org's own address), never `EMAIL_PASS`.
+- **No email enumeration:** forgot-password still returns an identical response whether or not the email exists.
+- **No secret/password leakage:** SMTP auth-error messages do not contain the password; `emailError` stored for admins carries only technical text + guidance.
+- **Rate limiting intact:** login 10/15 min, reset 5/hr, invite 30/hr, test-email 10/10 min.
+- **No privilege escalation:** student creation is enum-locked to `role: "student"`; all admin routes gated by `isAdmin`.
+- **Input safety:** Mongoose parameterized queries; phone/name validated by regex/length.
+
+#### Render Configuration Still Required (action items)
+1. Set **`EMAIL_USER`** + **`EMAIL_PASS`** in the Render dashboard, where `EMAIL_PASS` is a 16-char Gmail **App Password** (enable 2FA first).
+2. Set **`FRONTEND_URL`** to the production domain (used in invite/reset links).
+3. After deploy, open Admin → **Diagnostics** → *Send Test Email* to confirm; if it fails, the on-screen code+hint identifies the exact issue.
+
+---
+
 ### 2026-06-01 — Invite UX Overhaul, Inline Blog Reader, Email IPv4 Fix, Exam Logo Theming
 
 **Files Created:** _(none — all changes modify existing files; BlogModal removed)_

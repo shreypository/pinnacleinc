@@ -42,11 +42,11 @@ export const resetPassword = (token, password) =>
 export const verifyInviteToken = (token) =>
   fetch(`${API}/api/invite/verify/${token}`).then(handle);
 
-export const acceptInvite = (token, password, name) =>
+export const acceptInvite = (token, password, name, phone) =>
   fetch(`${API}/api/invite/accept`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token, password, name })
+    body: JSON.stringify({ token, password, name, phone })
   }).then(handle);
 
 export const sendInvite = (email) =>
@@ -63,6 +63,25 @@ export const getInviteList = () =>
   fetch(`${API}/api/invite/list`, {
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
+
+/* ─── Email Diagnostics (admin) ─────────────────────────────────
+   These return the FULL structured body on both success and failure
+   (so the UI can show error code + hint). They never throw. */
+const diagFetch = async (path, opts = {}) => {
+  try {
+    const res = await fetch(`${API}${path}`, {
+      ...opts,
+      headers: { Authorization: `Bearer ${adminToken()}`, ...(opts.headers || {}) }
+    });
+    const body = await res.json().catch(() => ({}));
+    return { httpOk: res.ok, status: res.status, ...body };
+  } catch (e) {
+    return { httpOk: false, ok: false, error: e.message || "Network error", code: "NETWORK" };
+  }
+};
+
+export const sendTestEmail   = () => diagFetch("/api/admin/test-email", { method: "POST" });
+export const checkEmailHealth = () => diagFetch("/api/admin/email-health");
 
 /* ─── Admin — students ─── */
 export const getAdminStats = () =>

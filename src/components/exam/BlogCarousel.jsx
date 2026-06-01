@@ -2,8 +2,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { API } from "../../services/api";
 import "./BlogCarousel.css";
 
-const ROTATE_MS   = 9000;  // carousel rotation interval
-const SCROLL_PPS  = 38;    // content scroll speed — pixels per second (comfortable reading)
+const SCROLL_PPS       = 38;    // auto-scroll speed — pixels/sec (comfortable reading)
+const RESUME_AFTER_MS  = 10000; // resume auto-scroll 10s after last manual interaction
+const END_PAUSE_MS     = 3000;  // pause 3s at end of article before next
+const SHORT_DWELL_MS   = 9000;  // dwell for short articles that don't need scrolling
 
 const formatDate = (d) =>
   new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
@@ -46,11 +48,15 @@ export default function BlogCarousel({ category, examName }) {
   const [fullBlog,       setFullBlog]       = useState(null);  // full content of current blog
   const [contentLoading, setContentLoading] = useState(false);
 
-  const hovered       = useRef(false);
-  const rotateRef     = useRef(null);
+  const hovered       = useRef(false);  // mouse over the card → pause auto-scroll
+  const userReading   = useRef(false);  // user manually scrolled → pause for 10s
+  const atBottom      = useRef(false);  // reached end of current article
   const rafRef        = useRef(null);
   const scrollEl      = useRef(null);
   const lastTimeRef   = useRef(null);
+  const resumeTimer   = useRef(null);   // 10s "resume auto-scroll" timer
+  const advanceTimer  = useRef(null);   // "go to next article" timer
+  const goNextRef     = useRef(() => {});
   const touchStartX   = useRef(null);
 
   /* ── Load blog list ── */
@@ -73,48 +79,7 @@ export default function BlogCarousel({ category, examName }) {
       .finally(() => setContentLoading(false));
   }, [current, blogs]);
 
-  /* ── Auto-scroll via requestAnimationFrame ── */
-  const startScroll = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    lastTimeRef.current = null;
-
-    const tick = (ts) => {
-      const el = scrollEl.current;
-      if (!el) return;
-      if (!lastTimeRef.current) lastTimeRef.current = ts;
-      const dt = ts - lastTimeRef.current;
-      lastTimeRef.current = ts;
-
-      if (!hovered.current) {
-        el.scrollTop += (SCROLL_PPS * dt) / 1000;
-        // Stop when fully scrolled
-        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2) return;
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-  }, []);
-
-  const stopScroll = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = null;
-    lastTimeRef.current = null;
-  }, []);
-
-  /* Start scroll when full content arrives */
-  useEffect(() => {
-    stopScroll();
-    if (!fullBlog) return;
-    // Small delay so DOM has painted the new content
-    const t = setTimeout(() => {
-      if (scrollEl.current) scrollEl.current.scrollTop = 0;
-      startScroll();
-    }, 120);
-    return () => { clearTimeout(t); stopScroll(); };
-  }, [fullBlog, startScroll, stopScroll]);
-
-  /* ── Carousel rotation ── */
+  /* ── Carousel navigation ── */
   const goTo = useCallback((idx, dir = "next") => {
     if (transitioning || blogs.length <= 1) return;
     setDirection(dir);
@@ -128,16 +93,95 @@ export default function BlogCarousel({ category, examName }) {
   const goNext = useCallback(() => goTo((current + 1) % blogs.length, "next"), [goTo, current, blogs.length]);
   const goPrev = useCallback(() => goTo((current - 1 + blogs.length) % blogs.length, "prev"), [goTo, current, blogs.length]);
 
+  // Keep a stable ref to goNext so the RAF loop always calls the latest version
+  useEffect(() => { goNextRef.current = goNext; }, [goNext]);
+
+  /* ── Auto-scroll loop + end-of-article advance ──
+     One RAF loop per displayed article. Increments scrollTop only when
+     not hovered and not in user-reading mode. When the bottom is reached,
+     it stops and schedules the next article after END_PAUSE_MS. */
   useEffect(() => {
-    if (blogs.length <= 1) return;
-    rotateRef.current = setInterval(() => { if (!hovered.current) goNext(); }, ROTATE_MS);
-    return () => clearInterval(rotateRef.current);
-  }, [blogs.length, goNext]);
+    // Reset per-article state
+    atBottom.current = false;
+    lastTimeRef.current = null;
+    if (advanceTimer.current) { clearTimeout(advanceTimer.current); advanceTimer.current = null; }
+    if (scrollEl.current) scrollEl.current.scrollTop = 0;
 
+    if (!fullBlog) return;
+
+    const scheduleAdvance = (delay) => {
+      if (advanceTimer.current || blogs.length <= 1) return;
+      advanceTimer.current = setTimeout(() => {
+        advanceTimer.current = null;
+        goNextRef.current();
+      }, delay);
+    };
+
+    const tick = (ts) => {
+      const el = scrollEl.current;
+      if (!el) { rafRef.current = requestAnimationFrame(tick); return; }
+
+      if (lastTimeRef.current == null) lastTimeRef.current = ts;
+      const dt = ts - lastTimeRef.current;
+      lastTimeRef.current = ts;
+
+      const canScroll = el.scrollHeight > el.clientHeight + 4;
+      const reachedBottom = !canScroll || (el.scrollTop + el.clientHeight >= el.scrollHeight - 2);
+
+      if (reachedBottom) {
+        if (!atBottom.current) {
+          atBottom.current = true;
+          // Article fully read → advance. Short (non-scrolling) articles dwell longer.
+          scheduleAdvance(canScroll ? END_PAUSE_MS : SHORT_DWELL_MS);
+        }
+      } else {
+        // User scrolled back up → cancel pending advance, keep reading
+        if (atBottom.current) {
+          atBottom.current = false;
+          if (advanceTimer.current) { clearTimeout(advanceTimer.current); advanceTimer.current = null; }
+        }
+        // Auto-scroll only when not paused by hover or manual reading
+        if (!hovered.current && !userReading.current) {
+          el.scrollTop += (SCROLL_PPS * dt) / 1000;
+        }
+      }
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    // Small delay so the DOM has painted the new content before measuring
+    const startId = setTimeout(() => {
+      lastTimeRef.current = null;
+      rafRef.current = requestAnimationFrame(tick);
+    }, 120);
+
+    return () => {
+      clearTimeout(startId);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (advanceTimer.current) { clearTimeout(advanceTimer.current); advanceTimer.current = null; }
+    };
+  }, [fullBlog, blogs.length]);
+
+  // Clean up the resume timer on unmount
+  useEffect(() => () => { if (resumeTimer.current) clearTimeout(resumeTimer.current); }, []);
+
+  /* ── Manual-scroll detection (wheel + touch) ──
+     Marks "user reading", which pauses auto-scroll. Auto-scroll resumes
+     RESUME_AFTER_MS after the last manual interaction. */
+  const onUserInteract = useCallback(() => {
+    userReading.current = true;
+    if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => {
+      userReading.current = false;          // resume auto-scroll from current position
+      lastTimeRef.current = null;           // avoid a big dt jump on resume
+    }, RESUME_AFTER_MS);
+  }, []);
+
+  /* ── Hover pauses auto-scroll (independent of the 10s rule) ── */
   const pauseAll  = () => { hovered.current = true; };
-  const resumeAll = () => { hovered.current = false; };
+  const resumeAll = () => { hovered.current = false; lastTimeRef.current = null; };
 
-  /* Touch swipe */
+  /* ── Horizontal touch swipe = navigate between articles ── */
   const onTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
   const onTouchEnd   = (e) => {
     if (touchStartX.current === null) return;
@@ -217,8 +261,13 @@ export default function BlogCarousel({ category, examName }) {
         {/* Divider */}
         <div className="bc-divider" />
 
-        {/* Auto-scrolling content */}
-        <div className="bc-scroll-wrap" ref={scrollEl}>
+        {/* Auto-scrolling content — user can also scroll manually */}
+        <div
+          className="bc-scroll-wrap"
+          ref={scrollEl}
+          onWheel={onUserInteract}
+          onTouchMove={onUserInteract}
+        >
           {contentLoading ? (
             <div className="bc-content-loading">
               <div className="bc-spinner" style={{ width: 24, height: 24, borderWidth: 2 }} />

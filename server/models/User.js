@@ -16,8 +16,16 @@ const UserSchema = new mongoose.Schema(
     },
     name: {
       type: String,
+      required: [true, "Full name is required"],
       trim: true,
-      default: ""
+      minlength: [2, "Name must be at least 2 characters"]
+    },
+    phone: {
+      type: String,
+      required: [true, "Phone number is required"],
+      trim: true,
+      // Digits only, 10–15 length
+      match: [/^\d{10,15}$/, "Phone must be 10–15 digits"]
     },
     role: {
       type: String,

@@ -5,12 +5,13 @@ import {
   sendInvite, getInviteList,
   getHomework, createHomework, updateHomework, deleteHomework, deleteHomeworkFile,
   getBlogs, createBlog, createBlogFromPdf, updateBlog, deleteBlog,
+  sendTestEmail, checkEmailHealth,
   API
 } from "../services/api";
 
 const EXAM_CATEGORIES = ["ACT", "GRE", "GMAT", "IELTS", "TOEFL", "PTE", "SAT", "General"];
 
-const TABS = ["Contacts", "Students", "Homework", "Blog", "Invites"];
+const TABS = ["Contacts", "Students", "Homework", "Blog", "Invites", "Diagnostics"];
 
 /* ══════════════════════════════════════════════
    ROOT — handles login gate
@@ -111,6 +112,7 @@ function Admin() {
           {activeTab === "Homework"  && <HomeworkTab />}
           {activeTab === "Blog"      && <BlogTab />}
           {activeTab === "Invites"   && <InvitesTab />}
+          {activeTab === "Diagnostics" && <DiagnosticsTab />}
         </div>
 
       </div>
@@ -932,6 +934,7 @@ function InvitesTab() {
                 <th>Date</th>
                 <th>Invite</th>
                 <th>Email</th>
+                <th>Delivered At</th>
               </tr>
             </thead>
             <tbody>
@@ -950,11 +953,99 @@ function InvitesTab() {
                       {emailStatusLabel(inv)}
                     </span>
                   </td>
+                  <td style={{ fontSize: "0.78rem", color: "#999" }}>
+                    {inv.emailSentAt
+                      ? new Date(inv.emailSentAt).toLocaleString()
+                      : inv.emailError
+                        ? <span title={inv.emailError} style={{ color: "#dc2626", cursor: "help" }}>failed ⓘ</span>
+                        : "—"}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   DIAGNOSTICS TAB — Email health + test send
+══════════════════════════════════════════════ */
+function DiagnosticsTab() {
+  const [testing, setTesting]   = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [result, setResult]     = useState(null); // { ok, message, error, code, hint, transport }
+
+  const runTest = async () => {
+    setTesting(true); setResult(null);
+    const r = await sendTestEmail();
+    setResult({ kind: "test", ...r });
+    setTesting(false);
+  };
+
+  const runHealth = async () => {
+    setChecking(true); setResult(null);
+    const r = await checkEmailHealth();
+    setResult({ kind: "health", ...r });
+    setChecking(false);
+  };
+
+  return (
+    <div className="admin-fade-in">
+      <div className="admin-card" style={{ padding: 24, marginBottom: 20 }}>
+        <h3 style={{ color: "#2d1457", marginBottom: 8, fontSize: "1rem" }}>Email Diagnostics</h3>
+        <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: 18, lineHeight: 1.6 }}>
+          Verify the SMTP connection and send a test email to the configured sender address.
+          Use this to confirm invite &amp; password-reset emails can be delivered.
+        </p>
+
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <button className="admin-primary-btn" onClick={runTest} disabled={testing || checking}>
+            {testing ? "Sending…" : "Send Test Email"}
+          </button>
+          <button className="admin-toggle-btn" onClick={runHealth} disabled={testing || checking}>
+            {checking ? "Checking…" : "Verify Connection"}
+          </button>
+        </div>
+
+        {/* Result */}
+        {result && (
+          <div
+            className={`admin-form-msg ${result.ok ? "success" : "error"}`}
+            style={{ marginTop: 18 }}
+          >
+            {result.ok ? (
+              <>
+                <strong>✓ {result.kind === "test" ? "Email delivered" : "SMTP connection OK"}</strong>
+                <div style={{ marginTop: 6, fontSize: "0.82rem" }}>
+                  {result.kind === "test" && result.message}
+                  {result.kind === "health" && `Connected to ${result.host}:${result.port} as ${result.user}`}
+                  {result.transport && ` · via ${result.transport}`}
+                </div>
+              </>
+            ) : (
+              <>
+                <strong>✗ {result.kind === "test" ? "Email failed" : "Connection failed"}</strong>
+                <div style={{ marginTop: 6, fontSize: "0.82rem" }}>
+                  <div><b>Error:</b> {result.error || "Unknown error"}</div>
+                  {result.code && <div><b>Code:</b> {result.code}</div>}
+                  {result.hint && <div style={{ marginTop: 4, color: "#92400e" }}><b>Hint:</b> {result.hint}</div>}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="admin-card" style={{ padding: 20 }}>
+        <h4 style={{ color: "#2d1457", marginBottom: 10, fontSize: "0.9rem" }}>Common fixes</h4>
+        <ul style={{ fontSize: "0.82rem", color: "#666", lineHeight: 1.8, paddingLeft: 18 }}>
+          <li><b>EAUTH / password:</b> EMAIL_PASS must be a Gmail <b>App Password</b> (2FA required), not the account password.</li>
+          <li><b>ENETUNREACH / ETIMEDOUT:</b> the host may block outbound SMTP. IPv4 is already forced; a 587 fallback is attempted automatically.</li>
+          <li><b>ENOCREDS:</b> set EMAIL_USER and EMAIL_PASS in the Render dashboard.</li>
+        </ul>
       </div>
     </div>
   );

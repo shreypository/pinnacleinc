@@ -12,6 +12,7 @@ export default function AcceptInvite() {
   const [status, setStatus] = useState("verifying"); // verifying | valid | invalid | submitting | done
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
@@ -29,6 +30,16 @@ export default function AcceptInvite() {
     e.preventDefault();
     setError("");
 
+    // ── Required-field validation (mirrors backend) ──
+    if (name.trim().length < 2) {
+      setError("Please enter your full name (at least 2 characters).");
+      return;
+    }
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (!/^\d{10,15}$/.test(phoneDigits)) {
+      setError("Please enter a valid phone number (10–15 digits).");
+      return;
+    }
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
       return;
@@ -40,7 +51,7 @@ export default function AcceptInvite() {
 
     setStatus("submitting");
     try {
-      const data = await acceptInvite(token, password, name);
+      const data = await acceptInvite(token, password, name.trim(), phoneDigits);
       loginStudent(data.token, data.user);
       navigate("/student-dashboard", { replace: true });
     } catch (err) {
@@ -93,7 +104,7 @@ export default function AcceptInvite() {
           {error && <div className="login-error">{error}</div>}
 
           <div className="login-field">
-            <label htmlFor="name">Your name <span style={{ color: "#aaa", fontWeight: 400 }}>(optional)</span></label>
+            <label htmlFor="name">Full name</label>
             <input
               id="name"
               type="text"
@@ -101,6 +112,22 @@ export default function AcceptInvite() {
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Arjun Sharma"
               autoComplete="name"
+              required
+              disabled={status === "submitting"}
+            />
+          </div>
+
+          <div className="login-field">
+            <label htmlFor="phone">Phone number</label>
+            <input
+              id="phone"
+              type="tel"
+              inputMode="numeric"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="e.g. 9876543210"
+              autoComplete="tel"
+              required
               disabled={status === "submitting"}
             />
           </div>

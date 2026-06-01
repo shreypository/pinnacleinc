@@ -75,13 +75,18 @@ router.post("/forgot-password", resetLimiter, async (req, res) => {
     const rawToken = crypto.randomBytes(32).toString("hex");
     user.resetToken = crypto.createHash("sha256").update(rawToken).digest("hex");
     user.resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-    await user.save();
+    // validateModifiedOnly: don't fail on legacy accounts missing name/phone
+    await user.save({ validateModifiedOnly: true });
+    console.log(`[RESET] Reset token generated for ${user.email}`);
 
     const resetLink = `${config.FRONTEND_URL}/reset-password/${rawToken}`;
+    console.log(`[RESET] Email send attempted for ${user.email}`);
     try {
       await sendPasswordResetEmail(user.email, resetLink);
+      console.log(`[RESET] Email delivery SUCCESS for ${user.email}`);
     } catch (e) {
-      console.error("Reset email failed:", e.message);
+      const detail = e.hint ? `${e.message} (${e.hint})` : e.message;
+      console.error(`[RESET] Email delivery FAILED for ${user.email}: ${detail}`);
     }
 
     res.json(ok);
@@ -109,13 +114,17 @@ router.post("/reset-password", async (req, res) => {
     });
 
     if (!user) {
+      console.warn("[RESET] Token verification FAILED (invalid or expired)");
       return res.status(400).json({ message: "Invalid or expired reset token" });
     }
+    console.log(`[RESET] Token verified for ${user.email}`);
 
     user.passwordHash = await bcrypt.hash(password, 12);
     user.resetToken = undefined;
     user.resetTokenExpiry = undefined;
-    await user.save();
+    // validateModifiedOnly: legacy accounts may predate required name/phone
+    await user.save({ validateModifiedOnly: true });
+    console.log(`[RESET] Password changed for ${user.email}`);
 
     res.json({ message: "Password reset successfully. You can now log in." });
   } catch (err) {

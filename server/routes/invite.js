@@ -51,20 +51,21 @@ router.post("/", verifyToken, isAdmin, inviteLimiter, async (req, res) => {
     let emailSent = false;
     let emailError = null;
 
+    console.log(`[INVITE] Token generated for ${emailLower} | email send attempted`);
     try {
       await sendInviteEmail(emailLower, inviteLink);
       emailSent = true;
+      console.log(`[INVITE] Email delivery SUCCESS for ${emailLower}`);
     } catch (e) {
-      emailError = e.message;
-      console.error(`[INVITE] Email delivery failed for ${emailLower}:`, e.message);
+      emailError = e.hint ? `${e.message} (${e.hint})` : e.message;
+      console.error(`[INVITE] Email delivery FAILED for ${emailLower}: ${emailError}`);
     }
 
-    // Persist email delivery status so admin history reflects reality
-    invite.emailSent  = emailSent;
-    invite.emailError = emailSent ? null : (emailError || "Unknown error");
+    // Persist delivery status so admin history reflects reality
+    invite.emailSent   = emailSent;
+    invite.emailSentAt = emailSent ? new Date() : null;
+    invite.emailError  = emailSent ? null : (emailError || "Unknown error");
     await invite.save();
-
-    console.log(`📨 Invite created for ${emailLower} by ${req.user.username} | emailSent: ${emailSent}`);
 
     res.json({
       message: emailSent ? "Invitation sent successfully" : "Invitation created — email delivery failed",
@@ -102,13 +103,24 @@ router.get("/verify/:token", async (req, res) => {
 /* ─── POST /api/invite/accept ── Student sets password ─── */
 router.post("/accept", async (req, res) => {
   try {
-    const { token, password, name } = req.body;
+    const { token, password, name, phone } = req.body;
 
     if (!token || !password) {
       return res.status(400).json({ message: "Token and password required" });
     }
+
+    // ── Required-field validation (backend, not just frontend) ──
+    const cleanName  = (name  || "").trim();
+    const cleanPhone = (phone || "").trim();
+
+    if (cleanName.length < 2) {
+      return res.status(400).json({ message: "Full name is required (at least 2 characters)." });
+    }
+    if (!/^\d{10,15}$/.test(cleanPhone)) {
+      return res.status(400).json({ message: "A valid phone number (10–15 digits) is required." });
+    }
     if (password.length < 8) {
-      return res.status(400).json({ message: "Password must be at least 8 characters" });
+      return res.status(400).json({ message: "Password must be at least 8 characters." });
     }
 
     const hash = crypto.createHash("sha256").update(token).digest("hex");
@@ -131,7 +143,8 @@ router.post("/accept", async (req, res) => {
     const user = new User({
       email: invite.email,
       passwordHash,
-      name: name?.trim() || "",
+      name: cleanName,
+      phone: cleanPhone,
       emailVerified: true,
       isActive: true
     });
@@ -152,9 +165,14 @@ router.post("/accept", async (req, res) => {
     res.status(201).json({
       message: "Account created. Welcome to Pinnacle!",
       token: jwtToken,
-      user: { id: user._id, email: user.email, name: user.name }
+      user: { id: user._id, email: user.email, name: user.name, phone: user.phone }
     });
   } catch (err) {
+    // Surface Mongoose schema validation as a 400 with the first field message
+    if (err.name === "ValidationError") {
+      const first = Object.values(err.errors)[0]?.message || "Invalid input";
+      return res.status(400).json({ message: first });
+    }
     console.error("Accept invite:", err.message);
     res.status(500).json({ message: "Server error" });
   }

@@ -2,67 +2,121 @@ const nodemailer = require("nodemailer");
 const config = require("../env");
 
 /*
-  ROOT CAUSE OF connect ENETUNREACH 2607:f8b0:400e:...:465
-  ──────────────────────────────────────────────────────────
-  DNS resolves smtp.gmail.com to an IPv6 address on some hosts.
-  Render's infrastructure does not support outbound IPv6.
-  Fix: pass `family: 4` to the nodemailer transport, which forces
-  the underlying Node.js net.Socket to use IPv4 only.
+  EMAIL DELIVERY — Pinnacle
+  ─────────────────────────────────────────────────────────────
+  ROOT CAUSE history: `connect ENETUNREACH 2607:f8b0:...:465`
+    smtp.gmail.com resolves to IPv6 on Render, which has no
+    outbound IPv6 → unreachable. Fixed with `family: 4` (IPv4).
 
-  GMAIL APP PASSWORD SETUP
-  ─────────────────────────
-  EMAIL_PASS must be a Gmail App Password, NOT the account password.
-  1. Enable 2-Factor Authentication on the Gmail account.
-  2. Go to https://myaccount.google.com/apppasswords
-  3. Create an App Password → select "Mail" / "Other (custom name)".
-  4. Copy the 16-character code (no spaces) into EMAIL_PASS.
+  This module now also:
+    • Sets explicit connection/greeting/socket TIMEOUTS so a bad
+      network fails fast with a clear error instead of hanging.
+    • Falls back from SSL:465 to STARTTLS:587 on connection errors
+      (some hosts block 465 specifically).
+    • Exposes verifyTransport() and sendTestEmail() for the
+      admin Email Diagnostics panel.
+
+  GMAIL APP PASSWORD (required):
+    EMAIL_PASS MUST be a 16-char Gmail App Password, not the
+    account password. Requires 2FA enabled on the account.
+    Create at: https://myaccount.google.com/apppasswords
 */
 
-let _transporter = null;
+const HOST = config.EMAIL_HOST || "smtp.gmail.com";
+const TIMEOUTS = {
+  connectionTimeout: 10000, // ms to establish TCP connection
+  greetingTimeout:   10000, // ms to wait for SMTP greeting
+  socketTimeout:     20000  // ms of inactivity before abort
+};
 
-const getTransporter = () => {
-  if (_transporter) return _transporter;
+// Connection errors worth retrying on the fallback port
+const RETRYABLE = new Set([
+  "ETIMEDOUT", "ECONNECTION", "ESOCKET", "ENETUNREACH", "ECONNREFUSED", "EDNS"
+]);
 
-  if (!config.EMAIL_USER || !config.EMAIL_PASS) {
-    throw new Error("EMAIL_USER and EMAIL_PASS must be set as environment variables.");
-  }
-
-  console.log(`[EMAIL] Creating transporter for: ${config.EMAIL_USER}`);
-
-  _transporter = nodemailer.createTransport({
-    host:   "smtp.gmail.com",
-    port:   465,
-    secure: true,          // SSL/TLS
-    family: 4,             // ← CRITICAL: force IPv4 (fixes ENETUNREACH on Render)
+const buildTransport = (port, secure) =>
+  nodemailer.createTransport({
+    host: HOST,
+    port,
+    secure,          // true → SSL (465); false → STARTTLS (587)
+    family: 4,       // force IPv4 — fixes ENETUNREACH on Render
     auth: {
       user: config.EMAIL_USER,
       pass: config.EMAIL_PASS
     },
-    tls: {
-      rejectUnauthorized: true
-    }
+    requireTLS: !secure, // for 587, require STARTTLS upgrade
+    tls: { rejectUnauthorized: true },
+    ...TIMEOUTS
   });
 
-  // Verify at creation time — logs the real error early
-  _transporter.verify((err) => {
-    if (err) {
-      console.error("[EMAIL ERROR] SMTP connection failed:", err.message);
-      console.error("[EMAIL ERROR] code:", err.code, "| errno:", err.errno);
-      if (err.code === "ENETUNREACH") {
-        console.error("[EMAIL] ENETUNREACH — network cannot reach SMTP host.");
-        console.error("[EMAIL] If on Render: ensure IPv4 is forced (family:4 is set).");
-        console.error("[EMAIL] Check that outbound port 465 is not blocked.");
-      } else if (err.code === "EAUTH" || err.message?.toLowerCase().includes("password")) {
-        console.error("[EMAIL] Authentication failed — verify EMAIL_PASS is a Gmail App Password.");
-        console.error("[EMAIL] App Passwords: https://myaccount.google.com/apppasswords");
-      }
-      _transporter = null; // reset so next call retries
-    } else {
-      console.log("[EMAIL] SMTP verified — ready to send.");
-    }
-  });
+// Cache the primary transporter only (587 fallback is built on demand)
+let _primary = null;
 
-  return _transporter;
+const ensureCreds = () => {
+  if (!config.EMAIL_USER || !config.EMAIL_PASS) {
+    const err = new Error("EMAIL_USER / EMAIL_PASS not configured on the server.");
+    err.code = "ENOCREDS";
+    throw err;
+  }
+};
+
+const getPrimary = () => {
+  ensureCreds();
+  if (!_primary) {
+    const port = Number(config.EMAIL_PORT) || 465;
+    _primary = buildTransport(port, port === 465);
+    console.log(`[EMAIL] Primary transport: ${HOST}:${port} (secure=${port === 465}, family=4)`);
+  }
+  return _primary;
+};
+
+/* Send with automatic 465→587 fallback on connection failure. */
+const deliver = async (mailOptions, label = "email") => {
+  ensureCreds();
+
+  // Attempt 1 — primary (usually 465 SSL)
+  try {
+    const t = getPrimary();
+    const r = await t.sendMail(mailOptions);
+    console.log(`[EMAIL] ${label} sent via primary — messageId: ${r.messageId}`);
+    return { ok: true, messageId: r.messageId, transport: "primary" };
+  } catch (e1) {
+    console.error(`[EMAIL ERROR] ${label} primary failed: code=${e1.code} msg=${e1.message}`);
+
+    // Only fall back for connection-level errors, not auth/content errors
+    if (!RETRYABLE.has(e1.code)) {
+      annotate(e1);
+      throw e1;
+    }
+
+    // Attempt 2 — STARTTLS 587
+    try {
+      console.log(`[EMAIL] Retrying ${label} on STARTTLS:587 …`);
+      const fallback = buildTransport(587, false);
+      const r = await fallback.sendMail(mailOptions);
+      console.log(`[EMAIL] ${label} sent via fallback:587 — messageId: ${r.messageId}`);
+      return { ok: true, messageId: r.messageId, transport: "fallback-587" };
+    } catch (e2) {
+      console.error(`[EMAIL ERROR] ${label} fallback:587 failed: code=${e2.code} msg=${e2.message}`);
+      annotate(e2);
+      _primary = null; // reset so a later attempt rebuilds
+      throw e2;
+    }
+  }
+};
+
+/* Attach human-readable guidance to the error for the diagnostics UI. */
+const annotate = (err) => {
+  if (err.code === "EAUTH" || /password|credential|username/i.test(err.message || "")) {
+    err.hint = "Authentication failed. EMAIL_PASS must be a Gmail App Password (2FA required), not the account password.";
+  } else if (err.code === "ENETUNREACH") {
+    err.hint = "Network unreachable. IPv4 is forced (family:4); confirm the host allows outbound SMTP.";
+  } else if (RETRYABLE.has(err.code)) {
+    err.hint = "Could not reach the SMTP server. The host may block outbound ports 465/587.";
+  } else if (err.code === "ENOCREDS") {
+    err.hint = "Set EMAIL_USER and EMAIL_PASS in the server environment.";
+  }
+  return err;
 };
 
 /* ── Templates ── */
@@ -88,13 +142,14 @@ const cta = (href, label) => `
     </a>
   </div>`;
 
-/* ── Public functions ── */
+const from = () => `"Pinnacle Education" <${config.EMAIL_USER}>`;
+
+/* ── Public senders ── */
 const sendInviteEmail = async (toEmail, inviteLink) => {
-  console.log(`[EMAIL] Sending invite to: ${toEmail}`);
-  const t = getTransporter();
-  const r = await t.sendMail({
-    from:    `"Pinnacle Education" <${config.EMAIL_USER}>`,
-    to:      toEmail,
+  console.log(`[EMAIL] Invite → ${toEmail}`);
+  return deliver({
+    from: from(),
+    to: toEmail,
     subject: "You're Invited to the Pinnacle Student Portal",
     html: `<div style="${BASE}">
       ${header("Welcome to Pinnacle")}
@@ -108,17 +163,14 @@ const sendInviteEmail = async (toEmail, inviteLink) => {
       </div>
       ${footer}
     </div>`
-  });
-  console.log(`[EMAIL] Invite delivered to ${toEmail} — messageId: ${r.messageId}`);
-  return r;
+  }, "invite");
 };
 
 const sendPasswordResetEmail = async (toEmail, resetLink) => {
-  console.log(`[EMAIL] Sending reset to: ${toEmail}`);
-  const t = getTransporter();
-  const r = await t.sendMail({
-    from:    `"Pinnacle Education" <${config.EMAIL_USER}>`,
-    to:      toEmail,
+  console.log(`[EMAIL] Reset → ${toEmail}`);
+  return deliver({
+    from: from(),
+    to: toEmail,
     subject: "Password Reset — Pinnacle Student Portal",
     html: `<div style="${BASE}">
       ${header("Password Reset")}
@@ -131,9 +183,42 @@ const sendPasswordResetEmail = async (toEmail, resetLink) => {
       </div>
       ${footer}
     </div>`
-  });
-  console.log(`[EMAIL] Reset delivered to ${toEmail} — messageId: ${r.messageId}`);
-  return r;
+  }, "reset");
 };
 
-module.exports = { sendInviteEmail, sendPasswordResetEmail };
+/* ── Diagnostics ── */
+
+// Verify SMTP connectivity + auth without sending an email.
+const verifyTransport = async () => {
+  ensureCreds();
+  const t = getPrimary();
+  await t.verify();
+  return { ok: true };
+};
+
+// Send a test email to the configured EMAIL_USER (never to an arbitrary address).
+const sendTestEmail = async () => {
+  console.log("[EMAIL] Test email requested by admin");
+  return deliver({
+    from: from(),
+    to: config.EMAIL_USER, // hard-locked to the sender — cannot be used to spam others
+    subject: "Pinnacle — Test Email ✓",
+    html: `<div style="${BASE}">
+      ${header("Test Email")}
+      <div style="padding:28px 24px;background:#fff;">
+        <p>This is a test email from your Pinnacle backend.</p>
+        <p style="color:#10b981;font-weight:600;">If you received this, email delivery is working. ✓</p>
+        <p style="color:#888;font-size:13px;">Sent at ${new Date().toISOString()}</p>
+      </div>
+      ${footer}
+    </div>`
+  }, "test");
+};
+
+module.exports = {
+  sendInviteEmail,
+  sendPasswordResetEmail,
+  verifyTransport,
+  sendTestEmail,
+  annotate
+};

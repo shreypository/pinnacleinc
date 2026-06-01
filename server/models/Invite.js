@@ -35,6 +35,10 @@ const InviteSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    emailSentAt: {
+      type: Date,
+      default: null
+    },
     emailError: {
       type: String,
       default: null

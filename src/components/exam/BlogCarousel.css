@@ -107,11 +107,29 @@
 .bc-scroll-wrap {
   position: relative;
   max-height: 320px;
-  overflow-y: hidden; /* JS drives the scroll; hide the bar */
-  scrollbar-width: none;
+  overflow-y: auto;            /* manual scrolling enabled; JS also auto-scrolls */
+  overscroll-behavior: contain; /* don't chain scroll to the page */
+  padding-right: 8px;          /* room for the scrollbar so text doesn't shift */
+
+  /* Firefox styled scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(106, 13, 173, 0.35) transparent;
 }
 
-.bc-scroll-wrap::-webkit-scrollbar { display: none; }
+/* WebKit styled scrollbar — slim, purple, rounded */
+.bc-scroll-wrap::-webkit-scrollbar {
+  width: 8px;
+}
+.bc-scroll-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+.bc-scroll-wrap::-webkit-scrollbar-thumb {
+  background: rgba(106, 13, 173, 0.3);
+  border-radius: 10px;
+}
+.bc-scroll-wrap::-webkit-scrollbar-thumb:hover {
+  background: rgba(106, 13, 173, 0.55);
+}
 
 .bc-body p {
   font-size: 0.98rem;
@@ -138,9 +156,9 @@
 .bc-scroll-fade {
   position: absolute;
   left: 0;
-  right: 0;
+  right: 12px; /* clear the scrollbar */
   bottom: 56px; /* sits above the controls */
-  height: 60px;
+  height: 48px;
   background: linear-gradient(transparent, rgba(255, 255, 255, 0.92));
   pointer-events: none;
   border-radius: 0 0 20px 20px;
