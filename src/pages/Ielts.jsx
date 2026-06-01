@@ -1,8 +1,15 @@
+import ExamPage from "../components/exam/ExamPage";
+
+const config = {
+  key:      "IELTS",
+  name:     "IELTS",
+  fullName: "International English Language Testing System",
+  org:      "British Council / IDP / Cambridge",
+  website:  "https://www.ielts.org",
+  tagline:  "World's most popular English language proficiency test",
+  abbr:     "IELTS"
+};
+
 export default function Ielts() {
-  return (
-    <div style={{ padding: "40px" }}>
-      <h1>IELTS</h1>
-      <p>Welcome to the IELTS preparation page.</p>
-    </div>
-  );
+  return <ExamPage config={config} />;
 }

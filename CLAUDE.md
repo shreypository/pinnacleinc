@@ -162,6 +162,14 @@ box-shadow:  0 15px 40px rgba(106, 13, 173, 0.25)
 - **Responsiveness:** Full breakpoints 900px / 768px / 425px / 375px / 320px (added 2026-06-01)
 - **Scroll reveal:** IntersectionObserver wired up for any future `.scroll-reveal` elements
 
+### SAT, ACT, GRE, GMAT, IELTS, TOEFL, PTE (7 exam pages)
+- **Files:** `src/pages/{Sat,Act,Gre,Gmat,Ielts,Toefl,Pte}.jsx`
+- **Purpose:** Premium exam info hub with official info block + blog insights carousel
+- **CSS:** Shared via `src/components/exam/ExamPage.css` (prefix `exam-`)
+- **Components used:** `ExamPage`, `BlogCarousel`, `BlogModal`
+- **Pattern:** Each page is just `<ExamPage config={...} />` — zero code changes to add content
+- **Blog filtering:** Each page fetches only its own category (`/api/blog/category/GRE`, etc.)
+
 ### Visa (`/visa`)
 - **Purpose:** Visa assistance services overview
 - **CSS:** Inline styles only — needs styled CSS file (pending)
@@ -219,6 +227,67 @@ box-shadow:  0 15px 40px rgba(106, 13, 173, 0.25)
 **Responsive improvements (EnglishProficiency.css):**
 - Added 768px, 425px, 375px, 320px breakpoints (previously only had 900px)
 - Mirrors Services.css breakpoint structure exactly
+
+---
+
+### 2026-06-01 — Exam Pages, Blog Carousel, PDF Blogs, Admin Enhancements
+
+#### Architecture: Exam Pages (zero-maintenance pattern)
+Every exam page is a single config object passed to `<ExamPage>`:
+```jsx
+export default function Gre() {
+  return <ExamPage config={{ key:"GRE", name:"GRE", org:"ETS", website:"...", ... }} />;
+}
+```
+Adding a new exam page = copy any exam page, change the config. No component changes.
+
+#### Components Created
+| File | Purpose |
+|------|---------|
+| `src/components/exam/ExamPage.jsx` | Shared page template: particles, mouse glow, official info card, blog section |
+| `src/components/exam/ExamPage.css` | Styles with `exam-` prefix (isolated) |
+| `src/components/exam/BlogCarousel.jsx` | Auto-advance carousel: 7s interval, fade+slide, touch swipe, dot indicators, empty/loading/error states |
+| `src/components/exam/BlogCarousel.css` | Carousel styles with `bc-` prefix |
+| `src/components/exam/BlogModal.jsx` | Full-screen modal viewer — text and PDF content, safe plain-text rendering (no innerHTML) |
+| `src/components/exam/BlogModal.css` | Modal styles with `bm-` prefix |
+
+#### Blog Category System
+Blogs are assigned an exam category (ACT/GRE/GMAT/IELTS/TOEFL/PTE/SAT/General).
+Each exam page fetches only its own category: `GET /api/blog/category/:category`.
+No cross-page leakage — GRE blogs never appear on IELTS page.
+
+#### PDF Blog Flow
+1. Admin uploads PDF in Admin Dashboard → Blog Tab → "PDF Upload" type
+2. Server reads PDF with `pdf-parse`, extracts text (sanitized of control chars)
+3. Content stored as text in `Blog.content` field; original PDF filename kept for metadata
+4. Users see extracted text in BlogModal — same experience as text blogs
+5. Limitations: image-only/scanned PDFs cannot be extracted (returns 422 error)
+6. PDF files stored in `server/uploads/pdf/` — never served publicly
+
+#### Database Schema Changes (Blog model)
+| Field | Type | Values | Purpose |
+|-------|------|---------|---------|
+| `blogType` | String enum | TEXT, PDF | Distinguishes article vs PDF |
+| `category` | String enum | ACT/GRE/GMAT/IELTS/TOEFL/PTE/SAT/General | Exam-page routing |
+| `pdfFileName` | String | — | Disk filename of uploaded PDF |
+| `pdfOriginalName` | String | — | User-friendly original name |
+| `pdfPageCount` | Number | — | Extracted page count |
+| Index | compound | `{category, isPublished, publishedAt}` | Fast category queries |
+
+#### New API Endpoints
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| GET | `/api/blog/category/:category` | public | Exam-page carousel data |
+| GET | `/api/blog/id/:id` | public | Full blog content for modal |
+| POST | `/api/blog/pdf` | admin | Upload PDF + extract text |
+
+**Route order matters:** `/category/:category` and `/id/:id` are registered BEFORE `/:slug` to prevent Express capturing "category"/"id" as slug values.
+
+#### Security Notes
+- PDF content is sanitized before storing (control chars stripped)
+- PDF content is rendered as plain text (no innerHTML) — XSS impossible
+- PDF files in `uploads/pdf/` have no static serving route (403 for direct access)
+- `pdf-parse` is read-only, no code execution from PDF content
 
 ---
 

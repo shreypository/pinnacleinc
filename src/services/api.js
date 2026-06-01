@@ -119,11 +119,27 @@ export const downloadHomeworkFile = (fileName) =>
 export const getBlogs = () =>
   fetch(`${API}/api/blog`).then(handle);
 
+// Fetch blogs for a specific exam category (used by ExamPage carousel)
+export const getBlogsByCategory = (category) =>
+  fetch(`${API}/api/blog/category/${encodeURIComponent(category)}`).then(handle);
+
+// Fetch full blog content by MongoDB _id
+export const getBlogById = (id) =>
+  fetch(`${API}/api/blog/id/${id}`).then(handle);
+
 export const getBlog = (slug) =>
   fetch(`${API}/api/blog/${slug}`).then(handle);
 
 export const createBlog = (formData) =>
   fetch(`${API}/api/blog`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${adminToken()}` },
+    body: formData
+  }).then(handle);
+
+// Upload PDF — backend extracts text and creates blog entry
+export const createBlogFromPdf = (formData) =>
+  fetch(`${API}/api/blog/pdf`, {
     method: "POST",
     headers: { Authorization: `Bearer ${adminToken()}` },
     body: formData

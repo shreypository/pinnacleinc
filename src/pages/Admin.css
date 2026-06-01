@@ -373,6 +373,12 @@
   box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
 }
 
+/* select element shares admin-form-input styles */
+select.admin-form-input {
+  cursor: pointer;
+  appearance: auto;
+}
+
 .admin-form-textarea {
   width: 100%;
   min-height: 100px;

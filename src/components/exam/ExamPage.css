@@ -1,0 +1,259 @@
+/* ════════════════════════════════════════════
+   EXAM PAGE — shared template
+   Prefix: exam-
+   Matches EnglishProficiency / Services design
+════════════════════════════════════════════ */
+
+/* ── Root ── */
+.exam-page {
+  position: relative;
+  min-height: 100vh;
+  background: #ffffff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Background glows ── */
+.exam-page::before {
+  content: "";
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(106, 13, 173, 0.13), transparent);
+  top: -140px;
+  left: -140px;
+  filter: blur(100px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.exam-page::after {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(199, 125, 255, 0.12), transparent);
+  bottom: -120px;
+  right: -120px;
+  filter: blur(100px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Particles ── */
+.exam-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.exam-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(106, 13, 173, 0.38);
+  border-radius: 50%;
+  bottom: -20px;
+  animation: pinnacle-floatUp linear infinite;
+  transition: transform 0.2s ease;
+}
+
+.exam-particle:nth-child(1)  { left: 10%; animation-duration: 12s; }
+.exam-particle:nth-child(2)  { left: 20%; animation-duration: 18s; }
+.exam-particle:nth-child(3)  { left: 30%; animation-duration: 14s; }
+.exam-particle:nth-child(4)  { left: 40%; animation-duration: 20s; }
+.exam-particle:nth-child(5)  { left: 50%; animation-duration: 16s; }
+.exam-particle:nth-child(6)  { left: 60%; animation-duration: 22s; }
+.exam-particle:nth-child(7)  { left: 70%; animation-duration: 13s; }
+.exam-particle:nth-child(8)  { left: 80%; animation-duration: 19s; }
+.exam-particle:nth-child(9)  { left: 90%; animation-duration: 15s; }
+.exam-particle:nth-child(10) { left: 15%; animation-duration: 17s; }
+.exam-particle:nth-child(11) { left: 25%; animation-duration: 21s; }
+.exam-particle:nth-child(12) { left: 35%; animation-duration: 13s; }
+.exam-particle:nth-child(13) { left: 45%; animation-duration: 18s; }
+.exam-particle:nth-child(14) { left: 55%; animation-duration: 16s; }
+.exam-particle:nth-child(15) { left: 65%; animation-duration: 20s; }
+.exam-particle:nth-child(16) { left: 75%; animation-duration: 14s; }
+.exam-particle:nth-child(17) { left: 85%; animation-duration: 19s; }
+.exam-particle:nth-child(18) { left: 95%; animation-duration: 22s; }
+.exam-particle:nth-child(19) { left: 5%;  animation-duration: 15s; }
+.exam-particle:nth-child(20) { left: 50%; animation-duration: 17s; }
+
+/* ── Mouse glow ── */
+.exam-mouse-glow {
+  position: fixed;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(106, 13, 173, 0.18), transparent);
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* ── Hero section ── */
+.exam-hero {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1100px;
+  padding: 80px 40px 60px;
+  display: flex;
+  justify-content: center;
+}
+
+/* ── Info card (glassmorphism) ── */
+.exam-info-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(106, 13, 173, 0.1);
+  border-radius: 24px;
+  padding: 48px 52px;
+  box-shadow: 0 20px 60px rgba(106, 13, 173, 0.09);
+  display: flex;
+  align-items: center;
+  gap: 44px;
+  width: 100%;
+  max-width: 860px;
+  transition: box-shadow 0.3s ease;
+}
+
+.exam-info-card:hover {
+  box-shadow: 0 28px 70px rgba(106, 13, 173, 0.14);
+}
+
+/* ── Logo mark ── */
+.exam-logo-mark {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  background: linear-gradient(135deg, #6a0dad, #7c3aed);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+  box-shadow: 0 12px 32px rgba(106, 13, 173, 0.3);
+  user-select: none;
+}
+
+/* ── Text block ── */
+.exam-info-text {
+  flex: 1;
+}
+
+.exam-name {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #2d1457;
+  margin-bottom: 4px;
+  line-height: 1.15;
+}
+
+.exam-full-name {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.exam-org {
+  font-size: 0.9rem;
+  color: #777;
+  margin-bottom: 8px;
+}
+
+.exam-org strong {
+  color: #6a0dad;
+}
+
+.exam-tagline {
+  font-size: 0.88rem;
+  color: #999;
+  font-style: italic;
+}
+
+/* ── CTA button ── */
+.exam-official-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 26px;
+  background: linear-gradient(135deg, #6a0dad, #7c3aed);
+  color: white;
+  text-decoration: none;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 8px 24px rgba(106, 13, 173, 0.25);
+}
+
+.exam-official-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(106, 13, 173, 0.35);
+}
+
+.exam-btn-arrow {
+  transition: transform 0.2s ease;
+}
+
+.exam-official-btn:hover .exam-btn-arrow {
+  transform: translateX(4px);
+}
+
+/* ── Blog section ── */
+.exam-blogs-section {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 40px 100px;
+}
+
+.exam-section-header {
+  margin-bottom: 36px;
+}
+
+.exam-section-title {
+  font-size: 1.9rem;
+  color: #2d1457;
+  margin-bottom: 8px;
+}
+
+.exam-section-sub {
+  font-size: 0.92rem;
+  color: #888;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .exam-info-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 36px 28px;
+    gap: 28px;
+  }
+  .exam-name { font-size: 2rem; }
+}
+
+@media (max-width: 768px) {
+  .exam-hero  { padding: 60px 20px 40px; }
+  .exam-blogs-section { padding: 0 20px 80px; }
+  .exam-section-title { font-size: 1.6rem; }
+}
+
+@media (max-width: 425px) {
+  .exam-hero { padding: 40px 16px 32px; }
+  .exam-blogs-section { padding: 0 16px 60px; }
+  .exam-name { font-size: 1.7rem; }
+  .exam-logo-mark { width: 76px; height: 76px; font-size: 1.3rem; }
+  .exam-official-btn { width: 100%; justify-content: center; }
+}

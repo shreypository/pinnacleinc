@@ -23,6 +23,9 @@ const ALLOWED_MIME = {
     "image/png",
     "image/gif",
     "image/webp"
+  ]),
+  pdf: new Set([
+    "application/pdf"
   ])
 };
 
@@ -65,4 +68,10 @@ const blogImageUpload = multer({
   limits: { fileSize: 10 * 1024 * 1024, files: 1 } // 10 MB
 });
 
-module.exports = { homeworkUpload, blogImageUpload };
+const blogPdfUpload = multer({
+  storage: makeStorage("pdf"),
+  fileFilter: makeFilter("pdf"),
+  limits: { fileSize: 20 * 1024 * 1024, files: 1 } // 20 MB max for blog PDFs
+});
+
+module.exports = { homeworkUpload, blogImageUpload, blogPdfUpload };

@@ -4,9 +4,11 @@ import {
   getAdminStats, getStudents, toggleStudent, deleteStudent,
   sendInvite, getInviteList,
   getHomework, createHomework, updateHomework, deleteHomework, deleteHomeworkFile,
-  getBlogs, createBlog, updateBlog, deleteBlog,
+  getBlogs, createBlog, createBlogFromPdf, updateBlog, deleteBlog,
   API
 } from "../services/api";
+
+const EXAM_CATEGORIES = ["ACT", "GRE", "GMAT", "IELTS", "TOEFL", "PTE", "SAT", "General"];
 
 const TABS = ["Contacts", "Students", "Homework", "Blog", "Invites"];
 
@@ -466,21 +468,24 @@ function HomeworkTab() {
 }
 
 /* ══════════════════════════════════════════════
-   BLOG TAB
+   BLOG TAB — supports TEXT and PDF blogs
 ══════════════════════════════════════════════ */
 function BlogTab() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
+  const [blogType, setBlogType] = useState("TEXT"); // "TEXT" | "PDF"
   const [form, setForm] = useState({
     title: "", content: "", category: "General",
     author: "Pinnacle Team", seoDescription: "", isPublished: false
   });
   const [imageFile, setImageFile] = useState(null);
+  const [pdfFile, setPdfFile]     = useState(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
   const [view, setView] = useState("list");
   const imageRef = useRef();
+  const pdfRef   = useRef();
 
   const load = () => {
     const t = localStorage.getItem("token");
@@ -491,29 +496,46 @@ function BlogTab() {
   useEffect(() => { load(); }, []);
 
   const resetForm = () => {
+    setBlogType("TEXT");
     setForm({ title: "", content: "", category: "General", author: "Pinnacle Team", seoDescription: "", isPublished: false });
-    setImageFile(null); setEditing(null); setMsg(""); setView("list");
+    setImageFile(null); setPdfFile(null); setEditing(null); setMsg(""); setView("list");
     if (imageRef.current) imageRef.current.value = "";
+    if (pdfRef.current)   pdfRef.current.value   = "";
   };
 
   const openEdit = (b) => {
     setEditing(b._id);
+    setBlogType(b.blogType || "TEXT");
     setForm({ title: b.title, content: b.content || "", category: b.category || "General",
       author: b.author || "Pinnacle Team", seoDescription: b.seoDescription || "", isPublished: b.isPublished });
-    setImageFile(null); setMsg(""); setView("form");
+    setImageFile(null); setPdfFile(null); setMsg(""); setView("form");
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || !form.content.trim()) {
-      setMsg("err:Title and content are required.");
-      return;
-    }
+    if (!form.title.trim()) { setMsg("err:Title is required."); return; }
+    if (blogType === "TEXT" && !form.content.trim()) { setMsg("err:Content is required for text blogs."); return; }
+    if (blogType === "PDF" && !editing && !pdfFile) { setMsg("err:Please select a PDF file."); return; }
+
     setSaving(true); setMsg("");
-    const fd = new FormData();
-    Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
-    if (imageFile) fd.append("featuredImage", imageFile);
+
     try {
-      editing ? await updateBlog(editing, fd) : await createBlog(fd);
+      if (blogType === "PDF" && !editing) {
+        // New PDF blog — upload PDF, backend extracts content
+        const fd = new FormData();
+        fd.append("pdf", pdfFile);
+        fd.append("title",          form.title.trim());
+        fd.append("category",       form.category);
+        fd.append("author",         form.author.trim() || "Pinnacle Team");
+        fd.append("seoDescription", form.seoDescription.trim());
+        fd.append("isPublished",    String(form.isPublished));
+        await createBlogFromPdf(fd);
+      } else {
+        // TEXT blog, or editing existing PDF blog (update metadata only)
+        const fd = new FormData();
+        Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
+        if (imageFile) fd.append("featuredImage", imageFile);
+        editing ? await updateBlog(editing, fd) : await createBlog(fd);
+      }
       setMsg("ok:Saved!");
       resetForm();
       load();
@@ -534,54 +556,116 @@ function BlogTab() {
   if (loading) return <Spinner />;
 
   if (view === "form") {
+    const msgType = msg.startsWith("ok:") ? "success" : "error";
+    const msgText = msg.slice(3);
     return (
       <div className="admin-fade-in">
         <div className="admin-card" style={{ padding: 24 }}>
           <h3 style={{ color: "#2d1457", marginBottom: 18, fontSize: "1rem" }}>
             {editing ? "Edit Blog Post" : "New Blog Post"}
           </h3>
+
           {msg && <div className={`admin-form-msg ${msgType}`}>{msgText}</div>}
 
+          {/* Blog Type — only for new posts */}
+          {!editing && (
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ fontSize: "0.82rem", color: "#555", marginBottom: 8, fontWeight: 600 }}>Blog Type</p>
+              <div style={{ display: "flex", gap: 10 }}>
+                {["TEXT", "PDF"].map((t) => (
+                  <button
+                    key={t}
+                    className={blogType === t ? "admin-primary-btn" : "admin-toggle-btn"}
+                    style={{ padding: "8px 20px" }}
+                    onClick={() => { setBlogType(t); setMsg(""); }}
+                    type="button"
+                  >
+                    {t === "PDF" ? "📄 PDF Upload" : "✦ Text Blog"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Common fields */}
           <div className="admin-form-row">
             <input className="admin-form-input" placeholder="Title *" value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })} />
-            <input className="admin-form-input" placeholder="Category" value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })} />
+            <select
+              className="admin-form-input"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+            >
+              {EXAM_CATEGORIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
+
           <div className="admin-form-row">
             <input className="admin-form-input" placeholder="Author" value={form.author}
               onChange={(e) => setForm({ ...form, author: e.target.value })} />
-            <input className="admin-form-input" placeholder="SEO description" value={form.seoDescription}
+            <input className="admin-form-input" placeholder="SEO / preview description" value={form.seoDescription}
               onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} />
           </div>
-          <textarea
-            className="admin-form-input admin-form-textarea"
-            style={{ minHeight: 200 }}
-            placeholder="Content *"
-            value={form.content}
-            onChange={(e) => setForm({ ...form, content: e.target.value })}
-          />
-          <div style={{ marginBottom: 14 }}>
-            <label className="admin-file-label">
-              Featured image (optional)
-              <input ref={imageRef} type="file" accept=".jpg,.jpeg,.png,.gif,.webp"
-                style={{ display: "none" }}
-                onChange={(e) => setImageFile(e.target.files[0] || null)} />
-            </label>
-            {imageFile && (
-              <p style={{ fontSize: "0.82rem", color: "#6c5ce7", marginTop: 6 }}>{imageFile.name}</p>
-            )}
-          </div>
+
+          {/* TEXT-only: content + image */}
+          {(blogType === "TEXT" || editing) && (
+            <>
+              <textarea
+                className="admin-form-input admin-form-textarea"
+                style={{ minHeight: 200 }}
+                placeholder="Content *"
+                value={form.content}
+                onChange={(e) => setForm({ ...form, content: e.target.value })}
+              />
+              <div style={{ marginBottom: 14 }}>
+                <label className="admin-file-label">
+                  Featured image (optional — JPG/PNG/WebP, max 10 MB)
+                  <input ref={imageRef} type="file" accept=".jpg,.jpeg,.png,.gif,.webp"
+                    style={{ display: "none" }}
+                    onChange={(e) => setImageFile(e.target.files[0] || null)} />
+                </label>
+                {imageFile && (
+                  <p style={{ fontSize: "0.82rem", color: "#6c5ce7", marginTop: 6 }}>{imageFile.name}</p>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* PDF-only: PDF upload */}
+          {blogType === "PDF" && !editing && (
+            <div style={{ marginBottom: 16 }}>
+              <label className="admin-file-label" style={{ borderColor: "#6a0dad" }}>
+                📄 Upload PDF (max 20 MB — text will be extracted automatically)
+                <input
+                  ref={pdfRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  style={{ display: "none" }}
+                  onChange={(e) => setPdfFile(e.target.files[0] || null)}
+                />
+              </label>
+              {pdfFile && (
+                <p style={{ fontSize: "0.82rem", color: "#6c5ce7", marginTop: 6 }}>
+                  Selected: {pdfFile.name} ({(pdfFile.size / (1024 * 1024)).toFixed(1)} MB)
+                </p>
+              )}
+              <p style={{ fontSize: "0.78rem", color: "#aaa", marginTop: 6 }}>
+                Note: Text-only PDFs work best. Image-only / scanned PDFs cannot be extracted.
+              </p>
+            </div>
+          )}
 
           <label className="admin-checkbox-label">
             <input type="checkbox" checked={form.isPublished}
               onChange={(e) => setForm({ ...form, isPublished: e.target.checked })} />
-            Publish immediately
+            Publish immediately (appears on exam page carousel)
           </label>
 
           <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
             <button className="admin-primary-btn" onClick={handleSave} disabled={saving}>
-              {saving ? "Saving…" : editing ? "Update" : "Create"}
+              {saving ? (blogType === "PDF" ? "Extracting PDF…" : "Saving…") : editing ? "Update" : "Create"}
             </button>
             <button className="admin-toggle-btn" onClick={resetForm}>Cancel</button>
           </div>
@@ -590,31 +674,44 @@ function BlogTab() {
     );
   }
 
+  const msgType = msg.startsWith("ok:") ? "success" : "error";
+  const msgText = msg.slice(3);
+
   return (
     <div className="admin-fade-in">
+      {msg && <div className={`admin-form-msg ${msgType}`} style={{ marginBottom: 16 }}>{msgText}</div>}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 18 }}>
-        <button className="admin-primary-btn" onClick={() => setView("form")}>+ New Post</button>
+        <button className="admin-primary-btn" onClick={() => { setView("form"); setBlogType("TEXT"); setMsg(""); }}>
+          + New Post
+        </button>
       </div>
       {blogs.length === 0 ? (
-        <EmptyState msg="No blog posts yet." />
+        <EmptyState msg="No blog posts yet. Create a Text or PDF blog above." />
       ) : (
         <div className="admin-blog-list">
           {blogs.map((b) => (
             <div className="admin-blog-item" key={b._id}>
               <div className="admin-hw-item-header">
-                <div>
+                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
                   <span className={`admin-status-badge ${b.isPublished ? "is-active" : "is-inactive"}`}>
                     {b.isPublished ? "Published" : "Draft"}
                   </span>
-                  <strong style={{ marginLeft: 10, color: "#2d1457" }}>{b.title}</strong>
+                  <span className="admin-hw-category-badge">
+                    {b.blogType === "PDF" ? "📄 PDF" : "✦ Text"}
+                  </span>
+                  <span className="admin-hw-category-badge" style={{ background: "rgba(106,13,173,0.08)" }}>
+                    {b.category}
+                  </span>
+                  <strong style={{ color: "#2d1457" }}>{b.title}</strong>
                 </div>
-                <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
                   <button className="admin-toggle-btn" onClick={() => openEdit(b)}>Edit</button>
                   <button className="admin-delete-btn" onClick={() => handleDelete(b._id)}>Delete</button>
                 </div>
               </div>
-              <p style={{ fontSize: "0.8rem", color: "#aaa", marginTop: 6 }}>
-                {b.category} &bull; {b.author} &bull; {new Date(b.createdAt).toLocaleDateString()}
+              <p style={{ fontSize: "0.78rem", color: "#aaa", marginTop: 6 }}>
+                {b.author} &bull; {new Date(b.createdAt).toLocaleDateString()}
+                {b.blogType === "PDF" && b.pdfPageCount ? ` · ${b.pdfPageCount} pages` : ""}
               </p>
             </div>
           ))}

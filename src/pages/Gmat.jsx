@@ -1,8 +1,15 @@
+import ExamPage from "../components/exam/ExamPage";
+
+const config = {
+  key:      "GMAT",
+  name:     "GMAT",
+  fullName: "Graduate Management Admission Test",
+  org:      "GMAC (Graduate Management Admission Council)",
+  website:  "https://www.mba.com",
+  tagline:  "The premier exam for admission to business schools globally",
+  abbr:     "GMAT"
+};
+
 export default function Gmat() {
-  return (
-    <div style={{ padding: "40px" }}>
-      <h1>GMAT</h1>
-      <p>Welcome to the GMAT preparation page.</p>
-    </div>
-  );
+  return <ExamPage config={config} />;
 }

@@ -1,8 +1,15 @@
+import ExamPage from "../components/exam/ExamPage";
+
+const config = {
+  key:      "GRE",
+  name:     "GRE",
+  fullName: "Graduate Record Examinations",
+  org:      "ETS (Educational Testing Service)",
+  website:  "https://www.ets.org/gre",
+  tagline:  "Required for admission to most graduate programs worldwide",
+  abbr:     "GRE"
+};
+
 export default function Gre() {
-  return (
-    <div style={{ padding: "40px" }}>
-      <h1>GRE</h1>
-      <p>Welcome to the GRE preparation page.</p>
-    </div>
-  );
+  return <ExamPage config={config} />;
 }
