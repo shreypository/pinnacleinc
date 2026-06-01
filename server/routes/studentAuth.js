@@ -5,7 +5,7 @@ const crypto = require("crypto");
 const rateLimit = require("express-rate-limit");
 const User = require("../models/User");
 const { sendPasswordResetEmail } = require("../utils/email");
-const config = require("../config");
+const config = require("../env");
 
 const router = express.Router();
 

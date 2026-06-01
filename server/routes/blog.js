@@ -6,7 +6,7 @@ const pdfParse = require("pdf-parse");
 const Blog = require("../models/Blog");
 const { verifyToken, isAdmin } = require("../middleware/authMiddleware");
 const { blogImageUpload, blogPdfUpload } = require("../middleware/upload");
-const config = require("../config");
+const config = require("../env");
 
 const router = express.Router();
 const BLOG_DIR  = path.join(__dirname, "../uploads/blog");

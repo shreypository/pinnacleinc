@@ -4,7 +4,7 @@ const Invite = require("../models/Invite");
 const Homework = require("../models/Homework");
 const Blog = require("../models/Blog");
 const { verifyToken, isAdmin } = require("../middleware/authMiddleware");
-const config = require("../config");
+const config = require("../env");
 
 const router = express.Router();
 

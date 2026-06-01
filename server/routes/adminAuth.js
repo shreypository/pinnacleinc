@@ -2,7 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const rateLimit = require("express-rate-limit");
-const config = require("../config");
+const config = require("../env");
 
 const router = express.Router();
 

@@ -7,7 +7,7 @@ const Invite = require("../models/Invite");
 const User = require("../models/User");
 const { verifyToken, isAdmin } = require("../middleware/authMiddleware");
 const { sendInviteEmail } = require("../utils/email");
-const config = require("../config");
+const config = require("../env");
 
 const router = express.Router();
 

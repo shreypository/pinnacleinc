@@ -1,5 +1,5 @@
 const calendar = require("./google");
-const config = require("./config");
+const config = require("./env");
 
 async function createMeeting(date, time) {
   try {

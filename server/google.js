@@ -1,5 +1,5 @@
 const { google } = require("googleapis");
-const config = require("./config"); // ✅ MUST BE HERE
+const config = require("./env");
 
 const oauth2Client = new google.auth.OAuth2(
   config.CLIENT_ID,
