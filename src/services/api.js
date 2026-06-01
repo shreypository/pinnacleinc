@@ -4,8 +4,15 @@ const studentToken = () => localStorage.getItem("studentToken");
 const adminToken = () => localStorage.getItem("token");
 
 const handle = async (res) => {
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) return Promise.reject(data);
+  const text = await res.text().catch(() => "");
+  let data = {};
+  try { data = text ? JSON.parse(text) : {}; } catch { /* non-JSON response */ }
+  if (!res.ok) {
+    // Always surface the message if available, so catch blocks show real errors
+    return Promise.reject(
+      data?.message ? data : { message: `HTTP ${res.status}: ${data?.message || text.slice(0, 120) || "Request failed"}` }
+    );
+  }
   return data;
 };
 

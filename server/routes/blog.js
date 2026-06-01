@@ -36,6 +36,14 @@ const sanitizePdfText = (raw) =>
     .replace(/[ \t]{3,}/g, "  ")                        // collapse wide spaces
     .substring(0, 500000);                              // cap at 500k chars
 
+// Normalize category: keep "General" as-is, uppercase everything else.
+// "General".toUpperCase() = "GENERAL" which is NOT in the Mongoose enum.
+const normalizeCategory = (raw) => {
+  if (!raw) return "General";
+  const u = raw.trim().toUpperCase();
+  return u === "GENERAL" ? "General" : u;
+};
+
 // ── PUBLIC: list all published ──────────────────────────────────────────
 router.get("/", async (req, res) => {
   try {
@@ -54,7 +62,7 @@ router.get("/", async (req, res) => {
 // MUST be before /:slug to prevent "category" being captured as a slug
 router.get("/category/:category", async (req, res) => {
   try {
-    const cat = req.params.category.toUpperCase();
+    const cat = normalizeCategory(req.params.category);
     const blogs = await Blog.find({ category: cat, isPublished: true })
       .sort({ publishedAt: -1, createdAt: -1 })
       .select("-content");
@@ -117,7 +125,7 @@ router.post(
         slug,
         blogType: "TEXT",
         content: content.trim(),
-        category: category?.toUpperCase() || "General",
+        category: normalizeCategory(category),
         author: author?.trim() || "Pinnacle Team",
         seoDescription: seoDescription?.trim() || "",
         isPublished: publish,
@@ -195,7 +203,7 @@ router.post(
         pdfFileName: req.file.filename,
         pdfOriginalName: req.file.originalname,
         pdfPageCount: pageCount,
-        category: category?.toUpperCase() || "General",
+        category: normalizeCategory(category),
         author: author?.trim() || "Pinnacle Team",
         seoDescription: seoDescription?.trim() || `${pageCount} pages extracted from ${req.file.originalname}`,
         isPublished: publish,
@@ -229,7 +237,7 @@ router.put(
       const { title, content, category, author, seoDescription, isPublished } = req.body;
       if (title?.trim()) blog.title = title.trim();
       if (content?.trim()) blog.content = content.trim();
-      if (category) blog.category = category.toUpperCase();
+      if (category) blog.category = normalizeCategory(category);
       if (author?.trim()) blog.author = author.trim();
       if (seoDescription !== undefined) blog.seoDescription = seoDescription.trim();
 
