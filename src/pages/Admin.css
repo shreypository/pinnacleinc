@@ -732,6 +732,96 @@ select.admin-form-input {
 .email-status-badge.failed    { background: rgba(239,68,68,0.1);   color: #dc2626; }
 .email-status-badge.pending   { background: rgba(251,191,36,0.12); color: #d97706; }
 
+/* ══════════════════════════════════════════════
+   FLIGHTS TAB
+══════════════════════════════════════════════ */
+
+/* Status badges — New (blue) / Contacted (orange) / Completed (green) */
+.flight-status-badge {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 20px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.flight-status-badge.is-new       { background: rgba(59, 130, 246, 0.14); color: #2563eb; }
+.flight-status-badge.is-contacted { background: rgba(249, 115, 22, 0.15); color: #ea580c; }
+.flight-status-badge.is-completed { background: rgba(16, 185, 129, 0.14); color: #059669; }
+
+/* Route cell: code + small city under it */
+.admin-flight-city {
+  display: block;
+  font-size: 0.7rem;
+  color: #9a93ab;
+  margin-top: 2px;
+}
+
+/* Action buttons cluster */
+.admin-flight-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 130px;
+}
+
+.admin-complete-btn {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.admin-complete-btn:hover:not(:disabled) { background: rgba(16, 185, 129, 0.22); }
+.admin-complete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Filter count chip */
+.admin-filter-count {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 7px;
+  border-radius: 20px;
+  background: rgba(106, 13, 173, 0.12);
+  color: #6a0dad;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.admin-filter-active .admin-filter-count {
+  background: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+
+/* ── Skeleton loaders ── */
+.admin-skeleton-list {
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+.admin-skeleton-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 6px;
+  border-bottom: 1px solid #f0f0f5;
+}
+.admin-skeleton-row:last-child { border-bottom: none; }
+.admin-skeleton-bar {
+  height: 14px;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);
+  background-size: 400% 100%;
+  animation: admin-shimmer 1.4s ease infinite;
+}
+@keyframes admin-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .admin-container  { padding: 16px; margin: 0; }
@@ -741,4 +831,5 @@ select.admin-form-input {
   .admin-stats-row  { flex-direction: column; }
   .admin-controls   { flex-direction: column; align-items: flex-start; }
   .admin-search-input { width: 100%; }
+  .admin-flights-table { min-width: 920px; }
 }

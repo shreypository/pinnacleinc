@@ -1,0 +1,176 @@
+/* ===============================================
+   AIRPORT SELECT — premium type-ahead picker
+   Prefix: as-
+=============================================== */
+.airport-select {
+  position: relative;
+  width: 100%;
+  font-family: "Inter", sans-serif;
+}
+
+/* ── Field (looks like a search-widget cell) ── */
+.as-field {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 14px 18px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: 14px;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.as-field:hover { background: rgba(106, 13, 173, 0.04); }
+
+.as-field-open {
+  background: rgba(106, 13, 173, 0.06);
+  box-shadow: inset 0 0 0 1.5px rgba(106, 13, 173, 0.35);
+}
+
+.as-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9a7bbf;
+  font-weight: 600;
+}
+
+.as-city {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d1457;
+  line-height: 1.15;
+}
+
+.as-placeholder { color: #b9a8d0; }
+
+.as-sub {
+  font-size: 0.72rem;
+  color: #8a8a9a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ── Dropdown ── */
+.as-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 340px;
+  max-width: 88vw;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(106, 13, 173, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(106, 13, 173, 0.22);
+  z-index: 60;
+  overflow: hidden;
+}
+
+/* ── Search row ── */
+.as-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(106, 13, 173, 0.08);
+}
+
+.as-search-icon {
+  font-size: 1.1rem;
+  color: #6a0dad;
+}
+
+.as-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: #2d1457;
+  font-family: "Inter", sans-serif;
+}
+
+.as-search-input::placeholder { color: #b9a8d0; }
+
+/* ── Results list ── */
+.as-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+/* Slim purple scrollbar */
+.as-list::-webkit-scrollbar { width: 6px; }
+.as-list::-webkit-scrollbar-thumb {
+  background: rgba(106, 13, 173, 0.3);
+  border-radius: 6px;
+}
+.as-list { scrollbar-width: thin; scrollbar-color: rgba(106,13,173,0.3) transparent; }
+
+.as-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.as-option-active { background: rgba(106, 13, 173, 0.09); }
+
+.as-option-code {
+  flex-shrink: 0;
+  width: 46px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6a0dad;
+  background: rgba(106, 13, 173, 0.1);
+  border-radius: 8px;
+  letter-spacing: 0.04em;
+}
+
+.as-option-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.as-option-city {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2d1457;
+}
+
+.as-option-name {
+  font-size: 0.74rem;
+  color: #8a8a9a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.as-empty {
+  padding: 24px 12px;
+  text-align: center;
+  color: #a99cc0;
+  font-size: 0.88rem;
+}
+
+@media (max-width: 480px) {
+  .as-city { font-size: 1.3rem; }
+  .as-dropdown { width: 92vw; }
+}

@@ -201,6 +201,38 @@ box-shadow:  0 15px 40px rgba(106, 13, 173, 0.25)
 
 ## Completed Tasks
 
+### 2026-06-13 — Flights Enhancement + Full Hotels Module
+
+**Architecture decision:** datasets now live in **JSON files** (`src/data/*.json`) behind a small search API layer (`src/data/*.js`). Expand coverage by editing JSON — no code change. Search is ranked + fuzzy (prefix / contains / word-start / subsequence) over city, name/region, IATA code, country.
+
+#### Datasets
+- `src/data/airports.json` — **150 airports** (all major + Tier-1/2/3 Indian incl. BLR/DEL/BOM/JAI/LKO/IXC/IXE/TRV/CJB/MYQ/HBX… + ~90 international hubs). `src/data/airports.js` exports `AIRPORTS`, `searchAirports(q,limit)`, `AIRPORT_COUNT`.
+- `src/data/locations.json` — **85 hotel destinations** (Indian hill stations/metros + global). `src/data/locations.js` exports `LOCATIONS`, `searchLocations(q,limit)`, `LOCATION_COUNT`.
+
+#### Shared component
+- `src/components/common/DateField.jsx` + `.css` — premium **animated calendar** picker (Framer Motion popover, month nav, min-date disabling, today/selected states). Replaces ALL native `<input type=date>`. Used by Flights (departure/return + each Multi City leg) and Hotels (check-in/check-out).
+
+#### Flights (extended — nothing removed)
+- `src/pages/Flights.jsx` — now uses `DateField`; **Multi City** shows add/removable journey segments (2–5 legs, per-leg From/To/Date with forward-only date mins); One Way hides return; Round Trip enforces return ≥ departure. Modal summary + payload handle all three trip types.
+- `src/components/flights/AirportSelect.jsx` — unchanged API; now searches the 150-airport set.
+- `server/models/FlightInquiry.js` — added optional `segments[]` (fromCity/Code, toCity/Code, date) for Multi City; backward compatible.
+- `server/routes/flights.js` — accepts + sanitizes `segments` (max 5) when tripType is Multi City.
+
+#### Hotels (new full module)
+- `src/pages/Hotels.jsx` + `.css` — replaced placeholder with a premium page: **animated skyline** (flickering lit windows), **floating glass hotel cards**, **dynamic lighting blobs**, particles, parallax, scroll-reveal. Glass search widget: Location (searchable, free-text allowed), Check-In/Check-Out (`DateField`), Rooms & Guests popover (Rooms/Adults/Children steppers), Price Range popover, Property Type chips (Hotel/Resort/Apartment/Villa/Hostel) → lead modal (Name/Email/Phone) → animated checkmark success.
+- `src/components/hotels/LocationSelect.jsx` + `.css` — type-ahead location picker with fuzzy match + free-text ("Use '…'") option.
+- `server/models/HotelInquiry.js` — location, locationLabel, checkIn, checkOut, rooms, adults, children, priceRange, propertyType (enum), name/email/phone, status (New/Contacted/Completed, default New), timestamps; indexed `{status, createdAt}`.
+- `server/routes/hotels.js` — `POST /api/hotels` (public, rate-limited 20/15min, validated), `GET` (admin), `PATCH /:id/status` (admin), `DELETE /:id` (admin).
+- `server/server.js` — registered `/api/hotels`.
+
+#### Admin
+- `src/pages/Admin.jsx` — new **Hotels** tab + `HotelsTab` (skeleton loaders, status filter w/ counts, full table, Mark Contacted / Mark Completed / Delete) mirroring `FlightsTab`. Added **Hotel Requests** stat card.
+- `server/routes/adminManage.js` — `/api/admin/stats` now returns `flightRequests` + `hotelRequests`.
+- `src/services/api.js` — added `createHotelInquiry`, `getHotelInquiries`, `updateHotelStatus`, `deleteHotelInquiry`.
+- Hotel status badges reuse `flight-status-badge` classes (New=blue, Contacted=orange, Completed=green) from Admin.css.
+
+**Routes unchanged:** `/flights-hotels` (hub) → `/services/flights`, `/services/hotels`. No existing functionality removed. Frontend `vite build` passes; backend `node --check` passes on all touched files.
+
 ### 2026-06-01 — Manual+Auto Blog Scroll, Email Hardening + Diagnostics, Required Registration Fields
 
 **Files Modified:**

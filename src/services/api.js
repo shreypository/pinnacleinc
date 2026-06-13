@@ -183,3 +183,67 @@ export const deleteBlog = (id) =>
     method: "DELETE",
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
+
+/* ─── Flights (lead generation) ─── */
+
+// Public: submit a flight assistance request
+export const createFlightInquiry = (payload) =>
+  fetch(`${API}/api/flights`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  }).then(handle);
+
+// Admin: list all flight inquiries
+export const getFlightInquiries = () =>
+  fetch(`${API}/api/flights`, {
+    headers: { Authorization: `Bearer ${adminToken()}` }
+  }).then(handle);
+
+// Admin: update workflow status (New | Contacted | Completed)
+export const updateFlightStatus = (id, status) =>
+  fetch(`${API}/api/flights/${id}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${adminToken()}`
+    },
+    body: JSON.stringify({ status })
+  }).then(handle);
+
+// Admin: delete an inquiry
+export const deleteFlightInquiry = (id) =>
+  fetch(`${API}/api/flights/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${adminToken()}` }
+  }).then(handle);
+
+/* ─── Hotels (lead generation) ─── */
+
+export const createHotelInquiry = (payload) =>
+  fetch(`${API}/api/hotels`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  }).then(handle);
+
+export const getHotelInquiries = () =>
+  fetch(`${API}/api/hotels`, {
+    headers: { Authorization: `Bearer ${adminToken()}` }
+  }).then(handle);
+
+export const updateHotelStatus = (id, status) =>
+  fetch(`${API}/api/hotels/${id}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${adminToken()}`
+    },
+    body: JSON.stringify({ status })
+  }).then(handle);
+
+export const deleteHotelInquiry = (id) =>
+  fetch(`${API}/api/hotels/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${adminToken()}` }
+  }).then(handle);

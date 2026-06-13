@@ -14,6 +14,8 @@ const inviteRoutes = require("./routes/invite");
 const homeworkRoutes = require("./routes/homework");
 const blogRoutes = require("./routes/blog");
 const adminManageRoutes = require("./routes/adminManage");
+const flightRoutes = require("./routes/flights");
+const hotelRoutes = require("./routes/hotels");
 
 // Existing helpers
 const Slot = require("./models/Slot");
@@ -120,6 +122,8 @@ app.use("/api/auth/student", studentAuthRoutes);
 app.use("/api/invite", inviteRoutes);
 app.use("/api/homework", homeworkRoutes);
 app.use("/api/blog", blogRoutes);
+app.use("/api/flights", flightRoutes);
+app.use("/api/hotels", hotelRoutes);
 
 /* ═══════════════════════════════════════
    ROUTES — existing contact / meeting

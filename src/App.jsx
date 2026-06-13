@@ -21,6 +21,8 @@ import Toefl from "./pages/Toefl";
 import Pte from "./pages/Pte";
 import Visa from "./pages/Visa";
 import FlightsHotels from "./pages/FlightsHotels";
+import Flights from "./pages/Flights";
+import Hotels from "./pages/Hotels";
 import Insurance from "./pages/Insurance";
 import Counselling from "./pages/Counselling";
 
@@ -67,6 +69,8 @@ function App() {
             <Route path="/pte" element={<Pte />} />
             <Route path="/visa" element={<Visa />} />
             <Route path="/flights-hotels" element={<FlightsHotels />} />
+            <Route path="/services/flights" element={<Flights />} />
+            <Route path="/services/hotels" element={<Hotels />} />
             <Route path="/insurance" element={<Insurance />} />
             <Route path="/college" element={<Counselling />} />
 

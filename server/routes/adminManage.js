@@ -4,6 +4,8 @@ const User = require("../models/User");
 const Invite = require("../models/Invite");
 const Homework = require("../models/Homework");
 const Blog = require("../models/Blog");
+const FlightInquiry = require("../models/FlightInquiry");
+const HotelInquiry = require("../models/HotelInquiry");
 const { verifyToken, isAdmin } = require("../middleware/authMiddleware");
 const { sendTestEmail, verifyTransport, annotate } = require("../utils/email");
 const config = require("../env");
@@ -66,16 +68,18 @@ router.get("/check-env", verifyToken, isAdmin, (_req, res) => {
 /* ─── GET /api/admin/stats ─── */
 router.get("/stats", verifyToken, isAdmin, async (req, res) => {
   try {
-    const [totalStudents, activeStudents, hwCount, publishedBlogs, pendingInvites] =
+    const [totalStudents, activeStudents, hwCount, publishedBlogs, pendingInvites, flightRequests, hotelRequests] =
       await Promise.all([
         User.countDocuments({ role: "student" }),
         User.countDocuments({ role: "student", isActive: true }),
         Homework.countDocuments(),
         Blog.countDocuments({ isPublished: true }),
-        Invite.countDocuments({ isUsed: false, expiresAt: { $gt: Date.now() } })
+        Invite.countDocuments({ isUsed: false, expiresAt: { $gt: Date.now() } }),
+        FlightInquiry.countDocuments(),
+        HotelInquiry.countDocuments()
       ]);
 
-    res.json({ totalStudents, activeStudents, hwCount, publishedBlogs, pendingInvites });
+    res.json({ totalStudents, activeStudents, hwCount, publishedBlogs, pendingInvites, flightRequests, hotelRequests });
   } catch (err) {
     console.error("Admin stats:", err.message);
     res.status(500).json({ message: "Server error" });

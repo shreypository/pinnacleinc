@@ -6,12 +6,14 @@ import {
   getHomework, createHomework, updateHomework, deleteHomework, deleteHomeworkFile,
   getBlogs, createBlog, createBlogFromPdf, updateBlog, deleteBlog,
   sendTestEmail, checkEmailHealth,
+  getFlightInquiries, updateFlightStatus, deleteFlightInquiry,
+  getHotelInquiries, updateHotelStatus, deleteHotelInquiry,
   API
 } from "../services/api";
 
 const EXAM_CATEGORIES = ["ACT", "GRE", "GMAT", "IELTS", "TOEFL", "PTE", "SAT", "General"];
 
-const TABS = ["Contacts", "Students", "Homework", "Blog", "Invites", "Diagnostics"];
+const TABS = ["Contacts", "Students", "Homework", "Blog", "Invites", "Flights", "Hotels", "Diagnostics"];
 
 /* ══════════════════════════════════════════════
    ROOT — handles login gate
@@ -112,6 +114,8 @@ function Admin() {
           {activeTab === "Homework"  && <HomeworkTab />}
           {activeTab === "Blog"      && <BlogTab />}
           {activeTab === "Invites"   && <InvitesTab />}
+          {activeTab === "Flights"   && <FlightsTab />}
+          {activeTab === "Hotels"    && <HotelsTab />}
           {activeTab === "Diagnostics" && <DiagnosticsTab />}
         </div>
 
@@ -135,7 +139,9 @@ function StatsStrip() {
     { label: "Active",          value: stats.activeStudents  },
     { label: "Homework",        value: stats.hwCount         },
     { label: "Published Blogs", value: stats.publishedBlogs  },
-    { label: "Pending Invites", value: stats.pendingInvites  }
+    { label: "Pending Invites", value: stats.pendingInvites  },
+    { label: "Flight Requests", value: stats.flightRequests  },
+    { label: "Hotel Requests",  value: stats.hotelRequests   }
   ] : [];
 
   return (
@@ -1046,6 +1052,323 @@ function DiagnosticsTab() {
           <li><b>ENETUNREACH / ETIMEDOUT:</b> the host may block outbound SMTP. IPv4 is already forced; a 587 fallback is attempted automatically.</li>
           <li><b>ENOCREDS:</b> set EMAIL_USER and EMAIL_PASS in the Render dashboard.</li>
         </ul>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   FLIGHTS TAB — flight assistance leads
+══════════════════════════════════════════════ */
+const FLIGHT_FILTERS = ["All", "New", "Contacted", "Completed"];
+
+function FlightsTab() {
+  const [inquiries, setInquiries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("All");
+  const [busyId, setBusyId] = useState(null);
+
+  const load = () =>
+    getFlightInquiries()
+      .then((d) => setInquiries(Array.isArray(d) ? d : []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+
+  useEffect(() => { load(); }, []);
+
+  const setStatus = async (id, status) => {
+    setBusyId(id);
+    try {
+      const updated = await updateFlightStatus(id, status);
+      setInquiries((list) => list.map((q) => (q._id === id ? updated : q)));
+    } catch { /* ignore — UI stays as-is */ }
+    finally { setBusyId(null); }
+  };
+
+  const remove = async (id) => {
+    if (!confirm("Delete this flight request permanently?")) return;
+    setBusyId(id);
+    try {
+      await deleteFlightInquiry(id);
+      setInquiries((list) => list.filter((q) => q._id !== id));
+    } catch { /* ignore */ }
+    finally { setBusyId(null); }
+  };
+
+  const statusClass = (s) =>
+    s === "Completed" ? "is-completed" : s === "Contacted" ? "is-contacted" : "is-new";
+
+  const fmtDate = (d) => (d ? new Date(d + "T00:00:00").toLocaleDateString() : "—");
+
+  const displayed = filter === "All" ? inquiries : inquiries.filter((q) => q.status === filter);
+
+  /* ── Skeleton loader ── */
+  if (loading) {
+    return (
+      <div className="admin-fade-in">
+        <div className="admin-skeleton-list">
+          {[...Array(5)].map((_, i) => (
+            <div className="admin-skeleton-row" key={i}>
+              <span className="admin-skeleton-bar" style={{ width: "18%" }} />
+              <span className="admin-skeleton-bar" style={{ width: "24%" }} />
+              <span className="admin-skeleton-bar" style={{ width: "14%" }} />
+              <span className="admin-skeleton-bar" style={{ width: "20%" }} />
+              <span className="admin-skeleton-bar" style={{ width: "12%" }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="admin-fade-in">
+      {/* Filter tabs */}
+      <div className="admin-controls admin-delay-1" style={{ marginBottom: 18 }}>
+        <div className="admin-filter-tabs">
+          {FLIGHT_FILTERS.map((f) => (
+            <button
+              key={f}
+              className={filter === f ? "admin-filter-active" : ""}
+              onClick={() => setFilter(f)}
+            >
+              {f}
+              {f !== "All" && (
+                <span className="admin-filter-count">
+                  {inquiries.filter((q) => q.status === f).length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="admin-table-wrapper admin-fade-in admin-delay-2">
+        {displayed.length === 0 ? (
+          <EmptyState msg={
+            filter === "All"
+              ? "No flight inquiries yet."
+              : `No ${filter.toLowerCase()} flight requests.`
+          } />
+        ) : (
+          <table className="admin-flights-table">
+            <thead>
+              <tr>
+                <th>Name</th><th>Email</th><th>Phone</th>
+                <th>From</th><th>To</th><th>Trip</th>
+                <th>Departure</th><th>Return</th>
+                <th>Pax</th><th>Class</th>
+                <th>Status</th><th>Created</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {displayed.map((q) => (
+                <tr key={q._id} className="admin-row-animate">
+                  <td>{q.name}</td>
+                  <td>{q.email}</td>
+                  <td>{q.phone}</td>
+                  <td>
+                    <strong>{q.fromAirportCode}</strong>
+                    <span className="admin-flight-city">{q.fromCity}</span>
+                  </td>
+                  <td>
+                    <strong>{q.toAirportCode}</strong>
+                    <span className="admin-flight-city">{q.toCity}</span>
+                  </td>
+                  <td>{q.tripType}</td>
+                  <td>{fmtDate(q.departureDate)}</td>
+                  <td>{q.returnDate ? fmtDate(q.returnDate) : "—"}</td>
+                  <td>{q.travellers}</td>
+                  <td>{q.cabinClass}</td>
+                  <td>
+                    <span className={`flight-status-badge ${statusClass(q.status)}`}>
+                      {q.status}
+                    </span>
+                  </td>
+                  <td>{new Date(q.createdAt).toLocaleDateString()}</td>
+                  <td>
+                    <div className="admin-flight-actions">
+                      {q.status !== "Contacted" && (
+                        <button
+                          className="admin-toggle-btn"
+                          disabled={busyId === q._id}
+                          onClick={() => setStatus(q._id, "Contacted")}
+                        >
+                          Mark Contacted
+                        </button>
+                      )}
+                      {q.status !== "Completed" && (
+                        <button
+                          className="admin-complete-btn"
+                          disabled={busyId === q._id}
+                          onClick={() => setStatus(q._id, "Completed")}
+                        >
+                          Mark Completed
+                        </button>
+                      )}
+                      <button
+                        className="admin-delete-btn"
+                        disabled={busyId === q._id}
+                        onClick={() => remove(q._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   HOTELS TAB — hotel assistance leads
+══════════════════════════════════════════════ */
+const HOTEL_FILTERS = ["All", "New", "Contacted", "Completed"];
+
+function HotelsTab() {
+  const [inquiries, setInquiries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("All");
+  const [busyId, setBusyId] = useState(null);
+
+  const load = () =>
+    getHotelInquiries()
+      .then((d) => setInquiries(Array.isArray(d) ? d : []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+
+  useEffect(() => { load(); }, []);
+
+  const setStatus = async (id, status) => {
+    setBusyId(id);
+    try {
+      const updated = await updateHotelStatus(id, status);
+      setInquiries((list) => list.map((q) => (q._id === id ? updated : q)));
+    } catch { /* ignore */ }
+    finally { setBusyId(null); }
+  };
+
+  const remove = async (id) => {
+    if (!confirm("Delete this hotel request permanently?")) return;
+    setBusyId(id);
+    try {
+      await deleteHotelInquiry(id);
+      setInquiries((list) => list.filter((q) => q._id !== id));
+    } catch { /* ignore */ }
+    finally { setBusyId(null); }
+  };
+
+  const statusClass = (s) =>
+    s === "Completed" ? "is-completed" : s === "Contacted" ? "is-contacted" : "is-new";
+
+  const fmtDate = (d) => (d ? new Date(d + "T00:00:00").toLocaleDateString() : "—");
+
+  const displayed = filter === "All" ? inquiries : inquiries.filter((q) => q.status === filter);
+
+  if (loading) {
+    return (
+      <div className="admin-fade-in">
+        <div className="admin-skeleton-list">
+          {[...Array(5)].map((_, i) => (
+            <div className="admin-skeleton-row" key={i}>
+              <span className="admin-skeleton-bar" style={{ width: "18%" }} />
+              <span className="admin-skeleton-bar" style={{ width: "24%" }} />
+              <span className="admin-skeleton-bar" style={{ width: "16%" }} />
+              <span className="admin-skeleton-bar" style={{ width: "18%" }} />
+              <span className="admin-skeleton-bar" style={{ width: "12%" }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="admin-fade-in">
+      <div className="admin-controls admin-delay-1" style={{ marginBottom: 18 }}>
+        <div className="admin-filter-tabs">
+          {HOTEL_FILTERS.map((f) => (
+            <button
+              key={f}
+              className={filter === f ? "admin-filter-active" : ""}
+              onClick={() => setFilter(f)}
+            >
+              {f}
+              {f !== "All" && (
+                <span className="admin-filter-count">
+                  {inquiries.filter((q) => q.status === f).length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="admin-table-wrapper admin-fade-in admin-delay-2">
+        {displayed.length === 0 ? (
+          <EmptyState msg={
+            filter === "All"
+              ? "No hotel inquiries yet."
+              : `No ${filter.toLowerCase()} hotel requests.`
+          } />
+        ) : (
+          <table className="admin-flights-table">
+            <thead>
+              <tr>
+                <th>Name</th><th>Email</th><th>Phone</th>
+                <th>Location</th><th>Check-In</th><th>Check-Out</th>
+                <th>Rooms</th><th>Guests</th><th>Type</th><th>Budget</th>
+                <th>Status</th><th>Created</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {displayed.map((q) => (
+                <tr key={q._id} className="admin-row-animate">
+                  <td>{q.name}</td>
+                  <td>{q.email}</td>
+                  <td>{q.phone}</td>
+                  <td>
+                    <strong>{q.location}</strong>
+                    {q.locationLabel && q.locationLabel !== q.location && (
+                      <span className="admin-flight-city">{q.locationLabel}</span>
+                    )}
+                  </td>
+                  <td>{fmtDate(q.checkIn)}</td>
+                  <td>{fmtDate(q.checkOut)}</td>
+                  <td>{q.rooms}</td>
+                  <td>{q.adults + q.children}</td>
+                  <td>{q.propertyType}</td>
+                  <td>{q.priceRange}</td>
+                  <td>
+                    <span className={`flight-status-badge ${statusClass(q.status)}`}>
+                      {q.status}
+                    </span>
+                  </td>
+                  <td>{new Date(q.createdAt).toLocaleDateString()}</td>
+                  <td>
+                    <div className="admin-flight-actions">
+                      {q.status !== "Contacted" && (
+                        <button className="admin-toggle-btn" disabled={busyId === q._id}
+                          onClick={() => setStatus(q._id, "Contacted")}>Mark Contacted</button>
+                      )}
+                      {q.status !== "Completed" && (
+                        <button className="admin-complete-btn" disabled={busyId === q._id}
+                          onClick={() => setStatus(q._id, "Completed")}>Mark Completed</button>
+                      )}
+                      <button className="admin-delete-btn" disabled={busyId === q._id}
+                        onClick={() => remove(q._id)}>Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
