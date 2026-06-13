@@ -247,3 +247,9 @@ export const deleteHotelInquiry = (id) =>
     method: "DELETE",
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
+
+/* ─── Visitor counter (MongoDB-backed) ─── */
+
+// Increment on each page visit/refresh; returns { count }
+export const recordVisit = () =>
+  fetch(`${API}/api/visitors/hit`, { method: "POST" }).then(handle);

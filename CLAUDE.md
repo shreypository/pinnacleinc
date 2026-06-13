@@ -201,6 +201,28 @@ box-shadow:  0 15px 40px rgba(106, 13, 173, 0.25)
 
 ## Completed Tasks
 
+### 2026-06-13 — Admin Table Compaction + Visitor Counter → MongoDB
+
+**Scope (only these two; no redesign/refactor of Flights/Hotels search/Blog):**
+
+**1. Admin tables — "Customer" column.** Merged `Name`/`Email`/`Phone` (3 columns) into one stacked **Customer** column in both the Flights and Hotels admin tables → 13 columns down to **11**, less horizontal scroll. Name = bold, phone = secondary, email = muted `mailto:` link.
+- `src/pages/Admin.jsx` — added shared `CustomerCell` component; both table headers now `<th>Customer</th>`, both bodies use `<CustomerCell .../>`. All other columns (flight/hotel details, Status, Created, Actions) untouched.
+- `src/pages/Admin.css` — added `.admin-customer-cell` / `-name` / `-phone` / `-email` styles.
+
+**2. Visitor counter — moved Firebase → MongoDB.**
+- **Root cause of "always 0":** the counter ran entirely on **Firebase Firestore** (`Home.jsx` → `firebase.js`) inside an `async` effect with **no `try/catch`**. When the Firestore call fails (most likely cause: Firestore test-mode security rules expired → all client reads/writes denied), the promise rejects unhandled, `setVisitors(...)` is never reached, and the UI stays at its initial state `0`. It failed silently (only an uncaught console rejection).
+- **Fix (now MongoDB-backed):**
+  - `server/models/Counter.js` — generic `{ key (unique), count }` counter.
+  - `server/routes/visitors.js` — `POST /api/visitors/hit` (atomic `$inc` with **upsert** → first hit auto-creates the doc, so no "missing initialization document" problem; returns `{count}`) and `GET /api/visitors` (read-only). Failures are **logged server-side** (`[VISITORS] …`) and return 500 — never silent.
+  - `server/server.js` — mounted `/api/visitors`.
+  - `src/services/api.js` — added `recordVisit()`.
+  - `src/pages/Home.jsx` — replaced the Firebase counter with `recordVisit()` on mount; `.catch` logs `[VISITORS]` to console (no silent fail). Removed the now-unused `firebase.js` imports from Home (the `firebase.js` file itself is left in place — now unused, safe to delete later).
+- **Behaviour restored & verified:** each page visit/refresh increments; value persists in MongoDB Atlas → survives server restarts and redeployments.
+
+**Verification (local, against Atlas):** `GET`→0, `POST /hit`→1→2→3, read-only `GET`→3 (no increment); a separate process then read `3` (proves cross-restart persistence); counter **reset to 0** for a clean production baseline. Frontend `vite build` + backend `node --check` pass.
+
+**Deployment note:** the new `/api/visitors` route requires a **backend redeploy** to Render to work on the live site (same as the Flights/Hotels routes). Front-end `API` base is still the hardcoded Render URL.
+
 ### 2026-06-13 — Flights Enhancement + Full Hotels Module
 
 **Architecture decision:** datasets now live in **JSON files** (`src/data/*.json`) behind a small search API layer (`src/data/*.js`). Expand coverage by editing JSON — no code change. Search is ranked + fuzzy (prefix / contains / word-start / subsequence) over city, name/region, IATA code, country.

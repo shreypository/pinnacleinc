@@ -1154,7 +1154,7 @@ function FlightsTab() {
           <table className="admin-flights-table">
             <thead>
               <tr>
-                <th>Name</th><th>Email</th><th>Phone</th>
+                <th>Customer</th>
                 <th>From</th><th>To</th><th>Trip</th>
                 <th>Departure</th><th>Return</th>
                 <th>Pax</th><th>Class</th>
@@ -1164,9 +1164,7 @@ function FlightsTab() {
             <tbody>
               {displayed.map((q) => (
                 <tr key={q._id} className="admin-row-animate">
-                  <td>{q.name}</td>
-                  <td>{q.email}</td>
-                  <td>{q.phone}</td>
+                  <td><CustomerCell name={q.name} phone={q.phone} email={q.email} /></td>
                   <td>
                     <strong>{q.fromAirportCode}</strong>
                     <span className="admin-flight-city">{q.fromCity}</span>
@@ -1320,7 +1318,7 @@ function HotelsTab() {
           <table className="admin-flights-table">
             <thead>
               <tr>
-                <th>Name</th><th>Email</th><th>Phone</th>
+                <th>Customer</th>
                 <th>Location</th><th>Check-In</th><th>Check-Out</th>
                 <th>Rooms</th><th>Guests</th><th>Type</th><th>Budget</th>
                 <th>Status</th><th>Created</th><th>Actions</th>
@@ -1329,9 +1327,7 @@ function HotelsTab() {
             <tbody>
               {displayed.map((q) => (
                 <tr key={q._id} className="admin-row-animate">
-                  <td>{q.name}</td>
-                  <td>{q.email}</td>
-                  <td>{q.phone}</td>
+                  <td><CustomerCell name={q.name} phone={q.phone} email={q.email} /></td>
                   <td>
                     <strong>{q.location}</strong>
                     {q.locationLabel && q.locationLabel !== q.location && (
@@ -1375,6 +1371,16 @@ function HotelsTab() {
 }
 
 /* ── Shared micro-components ── */
+
+// Stacked Name / Phone / Email cell (used by Flights + Hotels tables)
+const CustomerCell = ({ name, phone, email }) => (
+  <div className="admin-customer-cell">
+    <span className="admin-customer-name">{name}</span>
+    {phone && <span className="admin-customer-phone">{phone}</span>}
+    {email && <a className="admin-customer-email" href={`mailto:${email}`}>{email}</a>}
+  </div>
+);
+
 const Spinner = () => (
   <div style={{ textAlign: "center", padding: 40, color: "#aaa", fontFamily: "Inter, sans-serif" }}>
     Loading…

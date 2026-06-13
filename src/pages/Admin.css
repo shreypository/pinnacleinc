@@ -749,6 +749,24 @@ select.admin-form-input {
 .flight-status-badge.is-contacted { background: rgba(249, 115, 22, 0.15); color: #ea580c; }
 .flight-status-badge.is-completed { background: rgba(16, 185, 129, 0.14); color: #059669; }
 
+/* Stacked customer cell (Name / Phone / Email) — Flights + Hotels tables */
+.admin-customer-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+  line-height: 1.35;
+}
+.admin-customer-name  { font-weight: 700; color: #2d1457; font-size: 0.9rem; }
+.admin-customer-phone { font-size: 0.8rem; color: #555; }
+.admin-customer-email {
+  font-size: 0.78rem;
+  color: #9a93ab;
+  text-decoration: none;
+  word-break: break-all;
+}
+.admin-customer-email:hover { color: #6a0dad; text-decoration: underline; }
+
 /* Route cell: code + small city under it */
 .admin-flight-city {
   display: block;

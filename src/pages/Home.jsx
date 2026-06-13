@@ -4,14 +4,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import "./Home.css";
-import {
-  db,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  increment
-} from "../firebase.js";
+import { recordVisit } from "../services/api";
 
 export default function Home() {
 
@@ -56,38 +49,18 @@ export default function Home() {
     "0",
   ]);
 
-  // ================= RANDOM STATS ANIMATION =================
+  // ================= VISITOR COUNTER (MongoDB-backed) =================
+  // Increments on every page visit/refresh; value persists in MongoDB.
   useEffect(() => {
-
-  const updateVisitorCount = async () => {
-
-    const visitorRef = doc(db, "analytics", "visitors");
-
-    const visitorSnap = await getDoc(visitorRef);
-
-    if (!visitorSnap.exists()) {
-
-      await setDoc(visitorRef, {
-        count: 1
+    recordVisit()
+      .then((data) => {
+        if (typeof data?.count === "number") setVisitors(data.count);
+      })
+      .catch((err) => {
+        // Do not fail silently — surface the reason in the console.
+        console.error("[VISITORS] could not update visitor count:", err?.message || err);
       });
-
-      setVisitors(1);
-
-    } else {
-
-      await updateDoc(visitorRef, {
-        count: increment(1)
-      });
-
-      const updatedSnap = await getDoc(visitorRef);
-
-      setVisitors(updatedSnap.data().count);
-    }
-  };
-
-  updateVisitorCount();
-
-}, []);
+  }, []);
 
 
   useEffect(() => {
