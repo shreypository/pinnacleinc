@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { BackendProvider } from "./context/BackendContext";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -41,6 +42,7 @@ import "./styles/animations.css";
 
 function App() {
   return (
+    <BackendProvider>
     <AuthProvider>
       <div className="app">
 
@@ -94,6 +96,7 @@ function App() {
 
       </div>
     </AuthProvider>
+    </BackendProvider>
   );
 }
 

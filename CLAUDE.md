@@ -201,6 +201,39 @@ box-shadow:  0 15px 40px rgba(106, 13, 173, 0.25)
 
 ## Completed Tasks
 
+### 2026-06-13 — Backend Wake-Up System (Render cold-start handling)
+
+**Problem:** Render free-tier backend sleeps after ~15 min; first request takes 10–30s, so forms/admin/login feel frozen on a cold instance.
+
+**Result — files created:**
+- `server/server.js` → added public `GET /api/health` (`{status, uptime, timestamp, mongodb}`; sync, dependency-free, ~11 ms when awake).
+- `src/services/backendStatus.js` — framework-agnostic wake manager: `checkBackendHealth()`, `ensureBackendAwake()` (Action Guard), `warmBackend()`, `retryWake()`, pub/sub `subscribe()/getState()`, and `apiFetch()` (central interceptor). **10-min online cache** → no ping before every request; concurrent calls share one in-flight wake loop; per-attempt 28s, soft-timeout 30s (retry), hard-timeout 90s. **Now the single source of truth for the `API` base.**
+- `src/context/BackendContext.jsx` — `BackendProvider` + `useBackend()`; proactive **silent warm on startup**, 10-min visible-tab re-check, renders the overlay.
+- `src/components/backend/WakeOverlay.jsx` + `.css` — full-screen "Starting Pinnacle Services" (particles, glowing rings, cycling stages, 15s countdown, 30s "taking longer" + Retry). Closes instantly when ready.
+- `src/components/backend/BackendStatusBadge.jsx` + `.css` — admin header badge: green Online + ms / yellow Starting / red Offline.
+
+**Files modified:**
+- `src/services/api.js` — imports + re-exports `API` & `apiFetch` from backendStatus; all ~34 calls now go through `apiFetch`; `recordVisit()` uses `{ silent: true }` (background warm, no overlay).
+- `src/App.jsx` — wrapped app in `<BackendProvider>` (outermost).
+- `src/pages/Admin.jsx` — raw fetches (login, contact-data, blog list) → `apiFetch`; added `<BackendStatusBadge/>` to header.
+- `src/components/exam/BlogCarousel.jsx`, `src/pages/StudentDashboard.jsx`, `src/pages/Contact.jsx` — raw fetches → `apiFetch`.
+
+**Behaviour:** startup silently pings/warms Render; visitor counter also warms silently → backend is usually awake before any user action. A user action on a still-cold backend awaits the wake (overlay shown), then the original request proceeds automatically — **no manual retry**. Warm backend (cached <10 min) → requests fire instantly with zero extra pings.
+
+**Verified:** `GET /api/health` → 200 `{status:"ok",mongodb:"connected"}` ~11 ms; existing routes regression-pass (root string, `/api/blog` 200, `/api/flights` 401, `/api/visitors` read); frontend `vite build` + backend `node --check` pass. Lint: only repo-wide false-positives (`motion` jsx-uses-vars, one set-state-in-effect, provider+hook `only-export-components` — same as `AuthContext.jsx`).
+
+**No existing API functionality changed** — `apiFetch` returns the native `Response`, so every `.then(handle)` / `.json()` / `.blob()` consumer is untouched.
+
+**Deployment note:** requires the usual **backend redeploy** to Render so `/api/health` exists live (front-end `API` base unchanged).
+
+**Dependency map (backend-dependent surfaces found via scan):**
+- **Central:** `src/services/api.js` (~30 calls: student auth, invites, admin students/stats, homework, blog, flights, hotels, visitor counter, diagnostics) — all via `fetch(\`${API}/...\`)`.
+- **Raw fetch call sites:** `Admin.jsx` (admin login, contact-data list/delete, blog list), `components/exam/BlogCarousel.jsx` (category + full-blog fetch), `StudentDashboard.jsx` (authenticated homework download), `Contact.jsx` (slots, schedule-meeting, parent-enquiry — has its own `API_BASE`).
+- **Pages depending on backend:** Admin, Login, ForgotPassword/Reset, AcceptInvite, StudentDashboard, Flights, Hotels, Contact, exam pages (Blog carousel), Home (visitor counter).
+- **No `/api/health` endpoint existed** (only `GET /` string + admin-only `/api/admin/email-health`).
+
+**Plan:** add public `GET /api/health`; create `backendStatus.js` (health check + wake manager + central `apiFetch` interceptor with 10-min cache + pub/sub); `BackendProvider` context + premium full-screen `WakeOverlay` (particles/rings/stages/countdown, 30s "taking longer" + retry); route all API calls through `apiFetch` (proactive silent warm on startup + visitor counter; blocking overlay for user actions); admin backend-status badge (green/yellow/red + ms). No existing API behavior changed.
+
 ### 2026-06-13 — Admin Table Compaction + Visitor Counter → MongoDB
 
 **Scope (only these two; no redesign/refactor of Flights/Hotels search/Blog):**

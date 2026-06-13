@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { getHomework, downloadHomeworkFile, API } from "../services/api";
+import { getHomework, downloadHomeworkFile, API, apiFetch } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import "./StudentDashboard.css";
 
@@ -62,7 +62,7 @@ export default function StudentDashboard() {
     // Inject token via header not possible from <a> tag; open in new tab with Authorization header is complex.
     // Workaround: use fetch + blob download
     const t = localStorage.getItem("studentToken");
-    fetch(url, { headers: { Authorization: `Bearer ${t}` } })
+    apiFetch(url, { headers: { Authorization: `Bearer ${t}` } })
       .then((r) => r.blob())
       .then((blob) => {
         const objectUrl = URL.createObjectURL(blob);

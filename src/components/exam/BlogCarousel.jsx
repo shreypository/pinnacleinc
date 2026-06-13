@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { API } from "../../services/api";
+import { API, apiFetch } from "../../services/api";
 import "./BlogCarousel.css";
 
 const SCROLL_PPS       = 38;    // auto-scroll speed — pixels/sec (comfortable reading)
@@ -11,13 +11,13 @@ const formatDate = (d) =>
   new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
 async function fetchByCategory(category) {
-  const res = await fetch(`${API}/api/blog/category/${encodeURIComponent(category)}`);
+  const res = await apiFetch(`${API}/api/blog/category/${encodeURIComponent(category)}`);
   if (!res.ok) throw new Error("fetch failed");
   return res.json();
 }
 
 async function fetchFull(id) {
-  const res = await fetch(`${API}/api/blog/id/${id}`);
+  const res = await apiFetch(`${API}/api/blog/id/${id}`);
   if (!res.ok) throw new Error("fetch failed");
   return res.json();
 }

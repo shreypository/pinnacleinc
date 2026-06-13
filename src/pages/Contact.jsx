@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiFetch } from "../services/api";
 import "./Contact.css";
 import {
   FaInstagram,
@@ -84,7 +85,7 @@ export default function Contact() {
     setMeetLink("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/schedule-meeting`, {
+      const res = await apiFetch(`${API_BASE}/api/schedule-meeting`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -128,7 +129,7 @@ export default function Contact() {
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/parent-enquiry`, {
+      const res = await apiFetch(`${API_BASE}/api/parent-enquiry`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

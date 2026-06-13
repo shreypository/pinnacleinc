@@ -245,6 +245,17 @@ app.get("/api/slots", async (req, res) => {
 ═══════════════════════════════════════ */
 app.get("/", (_req, res) => res.send("Pinnacle backend running 🚀"));
 
+/* Lightweight public health probe — used by the frontend wake-up system.
+   Sync + dependency-free so it responds the instant the instance is awake. */
+app.get("/api/health", (_req, res) => {
+  res.json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: Date.now(),
+    mongodb: mongoose.connection.readyState === 1 ? "connected" : "disconnected"
+  });
+});
+
 /* ═══════════════════════════════════════
    MULTER ERROR HANDLER
 ═══════════════════════════════════════ */

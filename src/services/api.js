@@ -1,4 +1,7 @@
-export const API = "https://pinnacle-backend-pq2c.onrender.com";
+// API base + wake-aware fetch live in backendStatus (single source of truth).
+// apiFetch guarantees the Render instance is awake before every request.
+import { API, apiFetch } from "./backendStatus";
+export { API, apiFetch };
 
 const studentToken = () => localStorage.getItem("studentToken");
 const adminToken = () => localStorage.getItem("token");
@@ -18,21 +21,21 @@ const handle = async (res) => {
 
 /* ─── Student Auth ─── */
 export const studentLogin = (email, password) =>
-  fetch(`${API}/api/auth/student/login`, {
+  apiFetch(`${API}/api/auth/student/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
   }).then(handle);
 
 export const forgotPassword = (email) =>
-  fetch(`${API}/api/auth/student/forgot-password`, {
+  apiFetch(`${API}/api/auth/student/forgot-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email })
   }).then(handle);
 
 export const resetPassword = (token, password) =>
-  fetch(`${API}/api/auth/student/reset-password`, {
+  apiFetch(`${API}/api/auth/student/reset-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token, password })
@@ -40,17 +43,17 @@ export const resetPassword = (token, password) =>
 
 /* ─── Invite ─── */
 export const verifyInviteToken = (token) =>
-  fetch(`${API}/api/invite/verify/${token}`).then(handle);
+  apiFetch(`${API}/api/invite/verify/${token}`).then(handle);
 
 export const acceptInvite = (token, password, name, phone) =>
-  fetch(`${API}/api/invite/accept`, {
+  apiFetch(`${API}/api/invite/accept`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token, password, name, phone })
   }).then(handle);
 
 export const sendInvite = (email) =>
-  fetch(`${API}/api/invite`, {
+  apiFetch(`${API}/api/invite`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -60,7 +63,7 @@ export const sendInvite = (email) =>
   }).then(handle);
 
 export const getInviteList = () =>
-  fetch(`${API}/api/invite/list`, {
+  apiFetch(`${API}/api/invite/list`, {
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
 
@@ -69,7 +72,7 @@ export const getInviteList = () =>
    (so the UI can show error code + hint). They never throw. */
 const diagFetch = async (path, opts = {}) => {
   try {
-    const res = await fetch(`${API}${path}`, {
+    const res = await apiFetch(`${API}${path}`, {
       ...opts,
       headers: { Authorization: `Bearer ${adminToken()}`, ...(opts.headers || {}) }
     });
@@ -85,55 +88,55 @@ export const checkEmailHealth = () => diagFetch("/api/admin/email-health");
 
 /* ─── Admin — students ─── */
 export const getAdminStats = () =>
-  fetch(`${API}/api/admin/stats`, {
+  apiFetch(`${API}/api/admin/stats`, {
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
 
 export const getStudents = () =>
-  fetch(`${API}/api/admin/students`, {
+  apiFetch(`${API}/api/admin/students`, {
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
 
 export const toggleStudent = (id) =>
-  fetch(`${API}/api/admin/students/${id}/toggle`, {
+  apiFetch(`${API}/api/admin/students/${id}/toggle`, {
     method: "PATCH",
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
 
 export const deleteStudent = (id) =>
-  fetch(`${API}/api/admin/students/${id}`, {
+  apiFetch(`${API}/api/admin/students/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
 
 /* ─── Homework ─── */
 export const getHomework = (asAdmin = false) =>
-  fetch(`${API}/api/homework`, {
+  apiFetch(`${API}/api/homework`, {
     headers: { Authorization: `Bearer ${asAdmin ? adminToken() : studentToken()}` }
   }).then(handle);
 
 export const createHomework = (formData) =>
-  fetch(`${API}/api/homework`, {
+  apiFetch(`${API}/api/homework`, {
     method: "POST",
     headers: { Authorization: `Bearer ${adminToken()}` },
     body: formData
   }).then(handle);
 
 export const updateHomework = (id, formData) =>
-  fetch(`${API}/api/homework/${id}`, {
+  apiFetch(`${API}/api/homework/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${adminToken()}` },
     body: formData
   }).then(handle);
 
 export const deleteHomework = (id) =>
-  fetch(`${API}/api/homework/${id}`, {
+  apiFetch(`${API}/api/homework/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
 
 export const deleteHomeworkFile = (hwId, fileName) =>
-  fetch(`${API}/api/homework/${hwId}/file/${encodeURIComponent(fileName)}`, {
+  apiFetch(`${API}/api/homework/${hwId}/file/${encodeURIComponent(fileName)}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
@@ -143,21 +146,21 @@ export const downloadHomeworkFile = (fileName) =>
 
 /* ─── Blog ─── */
 export const getBlogs = () =>
-  fetch(`${API}/api/blog`).then(handle);
+  apiFetch(`${API}/api/blog`).then(handle);
 
 // Fetch blogs for a specific exam category (used by ExamPage carousel)
 export const getBlogsByCategory = (category) =>
-  fetch(`${API}/api/blog/category/${encodeURIComponent(category)}`).then(handle);
+  apiFetch(`${API}/api/blog/category/${encodeURIComponent(category)}`).then(handle);
 
 // Fetch full blog content by MongoDB _id
 export const getBlogById = (id) =>
-  fetch(`${API}/api/blog/id/${id}`).then(handle);
+  apiFetch(`${API}/api/blog/id/${id}`).then(handle);
 
 export const getBlog = (slug) =>
-  fetch(`${API}/api/blog/${slug}`).then(handle);
+  apiFetch(`${API}/api/blog/${slug}`).then(handle);
 
 export const createBlog = (formData) =>
-  fetch(`${API}/api/blog`, {
+  apiFetch(`${API}/api/blog`, {
     method: "POST",
     headers: { Authorization: `Bearer ${adminToken()}` },
     body: formData
@@ -165,21 +168,21 @@ export const createBlog = (formData) =>
 
 // Upload PDF — backend extracts text and creates blog entry
 export const createBlogFromPdf = (formData) =>
-  fetch(`${API}/api/blog/pdf`, {
+  apiFetch(`${API}/api/blog/pdf`, {
     method: "POST",
     headers: { Authorization: `Bearer ${adminToken()}` },
     body: formData
   }).then(handle);
 
 export const updateBlog = (id, formData) =>
-  fetch(`${API}/api/blog/${id}`, {
+  apiFetch(`${API}/api/blog/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${adminToken()}` },
     body: formData
   }).then(handle);
 
 export const deleteBlog = (id) =>
-  fetch(`${API}/api/blog/${id}`, {
+  apiFetch(`${API}/api/blog/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
@@ -188,7 +191,7 @@ export const deleteBlog = (id) =>
 
 // Public: submit a flight assistance request
 export const createFlightInquiry = (payload) =>
-  fetch(`${API}/api/flights`, {
+  apiFetch(`${API}/api/flights`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -196,13 +199,13 @@ export const createFlightInquiry = (payload) =>
 
 // Admin: list all flight inquiries
 export const getFlightInquiries = () =>
-  fetch(`${API}/api/flights`, {
+  apiFetch(`${API}/api/flights`, {
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
 
 // Admin: update workflow status (New | Contacted | Completed)
 export const updateFlightStatus = (id, status) =>
-  fetch(`${API}/api/flights/${id}/status`, {
+  apiFetch(`${API}/api/flights/${id}/status`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -213,7 +216,7 @@ export const updateFlightStatus = (id, status) =>
 
 // Admin: delete an inquiry
 export const deleteFlightInquiry = (id) =>
-  fetch(`${API}/api/flights/${id}`, {
+  apiFetch(`${API}/api/flights/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
@@ -221,19 +224,19 @@ export const deleteFlightInquiry = (id) =>
 /* ─── Hotels (lead generation) ─── */
 
 export const createHotelInquiry = (payload) =>
-  fetch(`${API}/api/hotels`, {
+  apiFetch(`${API}/api/hotels`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   }).then(handle);
 
 export const getHotelInquiries = () =>
-  fetch(`${API}/api/hotels`, {
+  apiFetch(`${API}/api/hotels`, {
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
 
 export const updateHotelStatus = (id, status) =>
-  fetch(`${API}/api/hotels/${id}/status`, {
+  apiFetch(`${API}/api/hotels/${id}/status`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -243,7 +246,7 @@ export const updateHotelStatus = (id, status) =>
   }).then(handle);
 
 export const deleteHotelInquiry = (id) =>
-  fetch(`${API}/api/hotels/${id}`, {
+  apiFetch(`${API}/api/hotels/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${adminToken()}` }
   }).then(handle);
@@ -252,4 +255,4 @@ export const deleteHotelInquiry = (id) =>
 
 // Increment on each page visit/refresh; returns { count }
 export const recordVisit = () =>
-  fetch(`${API}/api/visitors/hit`, { method: "POST" }).then(handle);
+  apiFetch(`${API}/api/visitors/hit`, { method: "POST" }, { silent: true }).then(handle);

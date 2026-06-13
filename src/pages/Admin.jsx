@@ -8,8 +8,9 @@ import {
   sendTestEmail, checkEmailHealth,
   getFlightInquiries, updateFlightStatus, deleteFlightInquiry,
   getHotelInquiries, updateHotelStatus, deleteHotelInquiry,
-  API
+  API, apiFetch
 } from "../services/api";
+import BackendStatusBadge from "../components/backend/BackendStatusBadge";
 
 const EXAM_CATEGORIES = ["ACT", "GRE", "GMAT", "IELTS", "TOEFL", "PTE", "SAT", "General"];
 
@@ -28,7 +29,7 @@ function Admin() {
   const handleLogin = async () => {
     setLoginError("");
     try {
-      const res = await fetch(`${API}/api/admin/login`, {
+      const res = await apiFetch(`${API}/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
@@ -88,7 +89,10 @@ function Admin() {
         {/* Header */}
         <div className="admin-header">
           <h1 className="admin-title-pop">Admin Dashboard</h1>
-          <button className="admin-logout-btn" onClick={handleLogout}>Logout</button>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <BackendStatusBadge />
+            <button className="admin-logout-btn" onClick={handleLogout}>Logout</button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -168,7 +172,7 @@ function ContactsTab() {
   const [filter, setFilter] = useState("all");
 
   const fetchContacts = () =>
-    fetch(`${API}/api/contact-data`, {
+    apiFetch(`${API}/api/contact-data`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     })
       .then((r) => r.json())
@@ -183,7 +187,7 @@ function ContactsTab() {
   };
 
   const handleDelete = (id) =>
-    fetch(`${API}/api/contact/${id}`, {
+    apiFetch(`${API}/api/contact/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(() => fetchContacts());
@@ -497,7 +501,7 @@ function BlogTab() {
 
   const load = () => {
     const t = localStorage.getItem("token");
-    fetch(`${API}/api/blog`, { headers: { Authorization: `Bearer ${t}` } })
+    apiFetch(`${API}/api/blog`, { headers: { Authorization: `Bearer ${t}` } })
       .then((r) => r.json()).then(setBlogs).catch(() => {}).finally(() => setLoading(false));
   };
 
